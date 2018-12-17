@@ -9,7 +9,7 @@ import (
 )
 
 type Cursor struct {
-  Base *Base
+  Base *XBase
   Transactional bool
 }
 
