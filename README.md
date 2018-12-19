@@ -50,5 +50,128 @@ V0.0.1 - 2018-11-14
 Manual:
 =======================
 
+The manual is still under construction.
+
+Some code to start working:
+
+Creates the connector to the database and connect:
+
+```
+  base := &xdominion.XBase{
+    DBType: xdominion.DB_Postgres,
+    Username: "username",
+    Password: "password",
+    Database: "test",
+    Host: xdominion.DB_Localhost,
+    SSL: false,
+  }
+  base.Logon()
+```
+
+Executes a query:
+
+```
+  q, err := base.Exec("drop table test")
+  if (err != nil) {
+    fmt.Println(err)
+  }
+  q.Close()
+```
+
+Creates a table definition:
+
+```
+t := xdominion.NewXTable("test", "t_")
+t.AddField(xdominion.XFieldInteger{Name: "f1", Constraints: xdominion.XConstraints{
+                                                  xdominion.XConstraint{Type: xdominion.PK},
+                                                  xdominion.XConstraint{Type: xdominion.AI},
+                                               } })   // ai, pk
+t.AddField(xdominion.XFieldVarChar{Name: "f2", Size: 20, Constraints: xdominion.XConstraints{
+                                                  xdominion.XConstraint{Type: xdominion.NN},
+                                               } })
+t.AddField(xdominion.XFieldText{Name: "f3"})
+t.AddField(xdominion.XFieldDate{Name: "f4"})
+t.AddField(xdominion.XFieldDateTime{Name: "f5"})
+t.AddField(xdominion.XFieldFloat{Name: "f6"})
+t.SetBase(base)
+```
+
+Synchronize the table with DB (create it if it does not exist)
+
+```
+  err = t.Synchronize()
+  if (err != nil) {
+    fmt.Println(err)
+  }
+```
+
+Some Insert:
+
+```
+  res1, err := tb.Insert(xdominion.XRecord{"f1": 1, "f2": "Data line 1",})
+  if (err != nil) {
+    fmt.Println(err)
+  }
+  fmt.Println(res1)  // res1 is the primary key
+```
+
+With an error (f2 is mandatory based on table definition):
+
+```
+  res21, err := tb.Insert(xdominion.XRecord{"f1": 2, "f3": "test",})
+  if (err != nil) {
+    fmt.Println(err)
+  }
+  fmt.Println(res21)
+```
+
+General query (select ALL):
+```
+  res3, err := tb.Select()
+  if err != nil {
+    fmt.Println(err)
+  } else {
+    for _, x := range res3.(xdominion.XRecords) {
+      fmt.Println(x)
+    }
+  }
+```
+
+Query by Key:
+
+```
+  res4, err := tb.Select(1)
+  if err != nil {
+    fmt.Println(err)
+  } else {
+    switch res4.(type) {
+      case xdominion.XRecord:
+        fmt.Println(res4)
+      case xdominion.XRecords:
+        for _, x := range res4.(xdominion.XRecords) {
+          fmt.Println(x)
+        }
+    }
+  }
+```
+  
+Query by Where:
+  
+```
+  res5, err := tb.Select(xdominion.XConditions{xdominion.NewXCondition("f1", "=", 1), xdominion.NewXCondition("f2", "like", "lin", "and")})
+  if err != nil {
+    fmt.Println(err)
+  } else {
+    switch res5.(type) {
+      case xdominion.XRecord:
+        fmt.Println(res5)
+      case xdominion.XRecords:
+        for _, x := range res5.(xdominion.XRecords) {
+          fmt.Println(x)
+        }
+    }
+  }
+```
+
 
 ---
