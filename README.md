@@ -24,6 +24,14 @@ TO DO:
 Version Changes Control
 =======================
 
+V0.0.3 - 2018-12-19
+-----------------------
+- XField added: Float, Date, DateTime, Text, partially implemented
+- XConditions and XCondition added, partially implemented
+- XConstraints and XConstaint added, partially implemented
+- XFieldSet added, partially implemented
+- XOrderBy added, partially implemented
+
 V0.0.2 - 2018-12-17
 -----------------------
 - Postgres implementation

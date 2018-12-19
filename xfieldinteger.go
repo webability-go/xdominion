@@ -7,11 +7,20 @@ import (
 type XFieldInteger struct
 {
   Name string
+  Constraints XConstraints
 }
 
 // creates the name of the field with its type (to create the table)
 func (f XFieldInteger)CreateField(prepend string, DB string, ifText *bool) string {
-  return prepend + f.Name + " integer"
+  ftype := " integer"
+  if IsAutoIncrement(f) {
+    ftype = " serial"
+  }
+  extra := ""
+  if f.Constraints != nil {
+    extra = f.Constraints.CreateConstraints(prepend, f.Name, DB)
+  }
+  return prepend + f.Name + ftype + extra
 }
 
 // creates a string representation of the value of the field for insert/update
@@ -40,31 +49,6 @@ func (f XFieldInteger)GetType() int {
 }
 
 // gets the checks of the field
-func (f XFieldInteger)GetChecks() interface{} {
-  return nil
-}
-
-// returns true if the field is a primary key for the table
-func (f XFieldInteger)IsPrimaryKey() bool {
-  return false
-}
-
-// returns true if the field is an auto-incremented field (with a sequence)
-func (f XFieldInteger)IsAutoIncrement() bool {
-  return false
-}
-
-// returns true if the field cannot be null
-func (f XFieldInteger)IsNotNull() bool {
-  return false
-}
-
-// returns true if the field checks contains a specific condition
-func (f XFieldInteger)Contains(check string) bool {
-  return false
-}
-
-// returns the foreign key of the field if defined
-func (f XFieldInteger)GetForeignKey() string {
-  return ""
+func (f XFieldInteger)GetConstraints() XConstraints {
+  return f.Constraints
 }

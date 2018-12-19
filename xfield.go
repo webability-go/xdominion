@@ -27,16 +27,38 @@ type XFieldDef interface {
   // gets the type of the field
   GetType() int
   // gets the checks of the field
-  GetChecks() interface{}
+  GetConstraints() XConstraints
   // returns true if the field is a primary key for the table
-  IsPrimaryKey() bool
+//  IsPrimaryKey() bool
   // returns true if the field is an auto-incremented field (with a sequence)
-  IsAutoIncrement() bool
+//  IsAutoIncrement() bool
   // returns true if the field cannot be null
-  IsNotNull() bool
+//  IsNotNull() bool
   // returns true if the field checks contains a specific condition
-  Contains(check string) bool
+//  Contains(check string) bool
   // returns the foreign key of the field if defined
-  GetForeignKey() string
+//  GetForeignKey() string
+}
+
+// returns true if the field is a primary key for the table
+func IsPrimaryKey(f XFieldDef) bool {
+  return IsFieldConstraint(f, PK)
+}
+
+func IsNotNull(f XFieldDef) bool {
+  return IsFieldConstraint(f, NN)
+}
+
+func IsAutoIncrement(f XFieldDef) bool {
+  return IsFieldConstraint(f, AI)
+}
+
+func IsFieldConstraint(f XFieldDef, ftype string) bool {
+  xc := f.GetConstraints()
+  if xc == nil { return false }
+  for _, c := range xc {
+    if c.Type == ftype { return true }
+  }
+  return false
 }
 
