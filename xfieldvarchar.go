@@ -8,11 +8,17 @@ type XFieldVarChar struct
 {
   Name string
   Size int
+  Constraints XConstraints
 }
 
 // creates the name of the field with its type (to create the table)
 func (f XFieldVarChar)CreateField(prepend string, DB string, ifText *bool) string {
-  return prepend + f.Name + " varchar(" + fmt.Sprint(f.Size) + ")"
+  ftype := " varchar(" + fmt.Sprint(f.Size) + ")"
+  extra := ""
+  if f.Constraints != nil {
+    extra = f.Constraints.CreateConstraints(prepend, f.Name, DB)
+  }
+  return prepend + f.Name + ftype + extra
 }
 
 // creates a string representation of the value of the field for insert/update
@@ -41,31 +47,6 @@ func (f XFieldVarChar)GetType() int {
 }
 
 // gets the checks of the field
-func (f XFieldVarChar)GetChecks() interface{} {
-  return nil
-}
-
-// returns true if the field is a primary key for the table
-func (f XFieldVarChar)IsPrimaryKey() bool {
-  return false
-}
-
-// returns true if the field is an auto-incremented field (with a sequence)
-func (f XFieldVarChar)IsAutoIncrement() bool {
-  return false
-}
-
-// returns true if the field cannot be null
-func (f XFieldVarChar)IsNotNull() bool {
-  return false
-}
-
-// returns true if the field checks contains a specific condition
-func (f XFieldVarChar)Contains(check string) bool {
-  return false
-}
-
-// returns the foreign key of the field if defined
-func (f XFieldVarChar)GetForeignKey() string {
-  return ""
+func (f XFieldVarChar)GetConstraints() XConstraints {
+  return f.Constraints
 }

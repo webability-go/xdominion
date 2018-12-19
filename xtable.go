@@ -1,7 +1,7 @@
 package xdominion
 
 import (
-//  "fmt"
+  "fmt"
   "strconv"
   "errors"
   "time"
@@ -38,6 +38,9 @@ func (t *XTable)Synchronize() error {
     query += f.CreateField(t.Prepend, t.Base.DBType, &ifText)
   }
   query += ")"
+  
+  fmt.Println(query)
+  
   cursor, err := t.Base.Exec(query)
   if err != nil { return err }
   defer cursor.Close()
@@ -59,21 +62,59 @@ func (t *XTable)Synchronize() error {
 
 func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   // 1. analyse params
-//  haskey := false
-//  hascondition := false
-//  hasorder := false
-//  haslimit := false
-//  hasoffset := false
-//  hasfields := false
-  for _, p := range args {
+  haskey := false
+  var key interface{}
+  hasconditions := false
+  var conditions XConditions
+  hasorder := false
+  var order XOrderBy
+  haslimit := false
+  var limit int
+  hasoffset := false
+  var offset int
+  hasfields := false
+  var fields XFieldSet
+  
+  for i, p := range args {
+    fmt.Printf("TYPE PARAM: %T\n", p)
     switch p.(type) {
       case int:
+        if i == 0 { 
+          haskey = true
+          key = p
+        } else {
+          if haslimit {
+            hasoffset = true
+            offset = p.(int)
+          } else {
+            haslimit = true
+            limit = p.(int)
+          }
+        }
       case float64, string, time.Time: // position 0 only
-//      case XCondition:
-//      case XOrderBy:
-//      case XFieldSet:
+        if i == 0 { 
+          haskey = true
+          key = p
+        } else {
+          return nil, errors.New("Error: a key value can only be on first parameter")
+        }
+      case XCondition:
+        hasconditions = true
+        conditions = XConditions{p.(XCondition)}
+      case XConditions:
+        hasconditions = true
+        conditions = p.(XConditions)
+      case XOrderBy:
+        hasorder = true
+        order = p.(XOrderBy)
+      case XFieldSet:
+        hasfields = true
+        fields = p.(XFieldSet)
     }
   }
+
+fmt.Println(hasconditions)
+fmt.Println(conditions)
   
   // 2. creates fields to scan
   sqlf := ""
@@ -81,7 +122,10 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   fieldslist := []string{}
   for _, f := range t.Fields {
     fname := f.GetName()
-//    if hasfields && fname not in Fields { continue }
+    if hasfields {
+      fmt.Println(fields)
+//    && fname not in Fields { continue }
+    }
     if item > 0 { sqlf += ", " }
     sqlf += t.Prepend + fname
     fieldslist = append(fieldslist, fname)
@@ -91,16 +135,42 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   
   sql := "select " + sqlf +" from " + t.Name;
   
+  itemdata := 1
+  sqldata := make([]interface{}, 0)
   // 3. build condition query
-  
+  if haskey {
+    // get primary key field
+    primkey := t.GetPrimaryKey()
+    if primkey == nil {
+      return nil, errors.New("There is no primary key on in the table")
+    }
+    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    itemdata++
+  } else if hasconditions {
+    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+  }
   
   // 4. build order by query
+  if hasorder {
+    sql += fmt.Sprint(order)
+  }
   
+  // 5. Limits
+  if haslimit {
+    sql += " limit " + strconv.Itoa(limit)
+  }
+  if hasoffset {
+    sql += " offset " + strconv.Itoa(offset)
+  }
   
-  // 5. exec and dump result
-  cursor, err := t.Base.Exec(sql)
-  defer cursor.Close()
+  fmt.Println(sql)
+
+      // 6. exec and dump result
+  cursor, err := t.Base.Exec(sql, sqldata...)
   if err != nil { return nil, err }
+  defer cursor.Close()
+
   var result = make([]interface{}, item)
   var bridge = make([]interface{}, item)
   for i, _ := range result {
@@ -132,7 +202,10 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   if somerecs != nil {
     return *somerecs, nil
   }
-  return *onerec, nil
+  if onerec != nil {
+    return *onerec, nil
+  }
+  return nil, nil
 }
 
 // Insert things into database:
@@ -174,12 +247,12 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
     fname := f.GetName()
     v, ok := rc.Get(fname)
     if !ok { 
-      if f.IsNotNull() || f.IsPrimaryKey() { return nil, errors.New("Field " + fname + " is mandatory") 
+      if IsNotNull(f) || IsPrimaryKey(f) { return nil, errors.New("Field " + fname + " is mandatory") 
       } else { continue }
     }
 
-    if f.IsAutoIncrement() && v.(int) == 0 { continue }
-    if f.IsPrimaryKey() { primkey = t.Prepend + fname }
+    if IsAutoIncrement(f) && v.(int) == 0 { continue }
+    if IsPrimaryKey(f) { primkey = t.Prepend + fname }
 
     if item > 0 {
       sqlf += ", "
@@ -198,6 +271,7 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
     cursor, err := t.Base.Exec(sql, sqldata...)
     if err != nil { return nil, err }
     defer cursor.Close()
+    cursor.Next()
     err = cursor.Scan(&key)
     if err != nil { return nil, err }
     t.InsertedKey = key
@@ -242,4 +316,16 @@ func (t *XTable)Avg(field string, condition interface{}) (interface{}, error) {
   return nil, nil
 }
 
+func (t *XTable)GetPrimaryKey() XFieldDef {
+  for _, f := range t.Fields {
+    if IsPrimaryKey(f) { return f }
+  }
+  return nil
+}
 
+func (t *XTable)GetField(name string) XFieldDef {
+  for _, f := range t.Fields {
+    if f.GetName() == name { return f }
+  }
+  return nil
+}
