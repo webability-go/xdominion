@@ -25,23 +25,33 @@ func (r *XRecords)Stringify() string {
   return fmt.Sprint(r)
 }
 
-func (r *XRecords)Push(data XRecordDef) {
-  *r = append(*r, data)
+func (d *XRecords)Unshift(data xcore.XDatasetDef) {
+  *d = append([]XRecordDef{data.(*XRecord)}, (*d)...)
 }
 
-func (r *XRecords)Pop() XRecordDef {
+func (d *XRecords)Shift() xcore.XDatasetDef {
+  data := (*d)[0]
+  *d = (*d)[1:]
+  return data
+}
+
+func (r *XRecords)Push(data xcore.XDatasetDef) {
+  *r = append(*r, data.(*XRecord))
+}
+
+func (r *XRecords)Pop() xcore.XDatasetDef {
   data := (*r)[len(*r)-1]
   *r = (*r)[:len(*r)-1]
   return data
 }
 
-func (r *XRecords)Get(index int) (XRecordDef, bool) {
-  if index < 0 || index >= len(*r) { return nil, false }
-  return (*r)[index], true
-}
-
 func (r *XRecords)Count() int {
   return len(*r)
+}
+
+func (r *XRecords)Get(index int) (xcore.XDatasetDef, bool) {
+  if index < 0 || index >= len(*r) { return nil, false }
+  return (*r)[index], true
 }
 
 func (r *XRecords)GetData(key string) (interface{}, bool) {
@@ -58,10 +68,39 @@ func (r *XRecords)GetDataString(key string) (string, bool) {
   return "", false
 }
 
-func (r *XRecords)GetDataRange(key string) (xcore.XDatasetCollectionDef, bool) {
-  v, ok := r.GetData(key)
-  // Verify v IS actually a XDatasetCollectionDef
-  if ok { return v.(xcore.XDatasetCollectionDef), true }
+func (d *XRecords)GetDataBool(key string) (bool, bool) {
+  if val, ok := d.GetData(key); ok {
+    switch val.(type) {
+      case bool: return val.(bool), true
+    }
+  }
+  return false, false
+}
+
+func (d *XRecords)GetDataInt(key string) (int, bool) {
+  if val, ok := d.GetData(key); ok {
+    switch val.(type) {
+      case int: return val.(int), true
+    }
+  }
+  return 0, false
+}
+
+func (d *XRecords)GetDataFloat(key string) (float64, bool) {
+  if val, ok := d.GetData(key); ok {
+    switch val.(type) {
+      case float64: return val.(float64), true
+    }
+  }
+  return 0, false
+}
+
+func (r *XRecords)GetCollection(key string) (xcore.XDatasetCollectionDef, bool) {
+  if val, ok := r.GetData(key); ok {
+    switch val.(type) {
+      case *XRecords: return val.(*XRecords), true
+    }
+  }
   return nil, false
 }
 
