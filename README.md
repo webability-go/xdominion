@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+V0.0.4 - 2019-01-06
+-----------------------
+- Modify XRecord to match XDataset last version (xcore 0.0.4)
+- Modify XRecords to match XDatasetCollection last version (xcore 0.0.4)
+
 V0.0.3 - 2018-12-19
 -----------------------
 - XField added: Float, Date, DateTime, Text, partially implemented

@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "testing"
+  "github.com/webability-go/xcore"
   "github.com/webability-go/xdominion"
 )
 
@@ -118,3 +119,45 @@ func getTableDef(base *xdominion.XBase) *xdominion.XTable {
   t.SetBase(base)
   return t
 }
+
+/* Test injection of a recordset into a template */
+func TestTemplate(t *testing.T) {
+
+  tmpl, _ := xcore.NewXTemplateFromString(`
+Some data:
+@@result@@
+[[result]]  Data 1: {{f1}}, data 2: {{f2}}
+[[]]
+End of array of data
+
+`)
+  
+  base := &xdominion.XBase{
+    DBType: xdominion.DB_Postgres,
+    Username: "username",
+    Password: "password",
+    Database: "test",
+    Host: xdominion.DB_Localhost,
+    SSL: false,
+  }
+  base.Logon()
+  
+  tb := getTableDef(base)
+  irecs, _ := tb.Select()
+  recs := irecs.(xdominion.XRecords)
+  
+  // the data must be into "result" parameter
+  data := xdominion.NewXRecord()
+  data.Set("result", &recs)
+
+  fmt.Println(recs)
+  fmt.Println(data)
+
+  result := tmpl.Execute(data)
+  fmt.Println("Result: ", result)
+  
+}
+
+
+
+
