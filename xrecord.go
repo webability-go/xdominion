@@ -74,6 +74,7 @@ func (r *XRecord)GetInt(key string) (int, bool) {
   if val, ok := (*r)[key]; ok {
     switch val.(type) {
       case int: return val.(int), true
+      case int64: return int(val.(int64)), true
       case float64: return int(val.(float64)), true
       case bool: if val.(bool) {
         return 1, true
@@ -90,6 +91,7 @@ func (r *XRecord)GetBool(key string) (bool, bool) {
     switch val.(type) {
       case bool: return val.(bool), true
       case int: return val.(int)!=0, true
+      case int64: return val.(int64)!=0, true
       case float64: return val.(float64)!=0, true
     }
   }
@@ -101,6 +103,7 @@ func (r *XRecord)GetFloat(key string) (float64, bool) {
     switch val.(type) {
       case float64: return val.(float64), true
       case int: return float64(val.(int)), true
+      case int64: return float64(val.(int64)), true
       case bool: if val.(bool) {
         return 1.0, true
       } else {
