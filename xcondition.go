@@ -34,8 +34,6 @@ type XConditions []XCondition
 func (c *XConditions)CreateConditions(table *XTable, DB string) string {
   cond := ""
 
-fmt.Println(c)
-
   for _, xc := range *c {
     cond += xc.GetCondition(table, DB)
   }
@@ -75,14 +73,10 @@ func (c *XCondition)GetCondition(table *XTable, DB string) string {
   
     field := table.GetField(c.Field);
     
-    fmt.Println("Condicion para ", field)
-    
     if field == nil {
       return ""
     }
     
-    fmt.Println("Creando la condicion: ")
-
     cond := ""
     
     if len(c.OperatorGlobal) > 0 {
@@ -121,8 +115,6 @@ func (c *XCondition)GetCondition(table *XTable, DB string) string {
     if c.AtomClose > 0 {
       cond += strings.Repeat(")", c.AtomClose)
     }
-    
-    fmt.Println(cond)
     
     return cond
   }

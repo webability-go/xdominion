@@ -57,7 +57,8 @@ func (t *XTable)Synchronize() error {
     3rd ARG is int: limit
     4th ARG is int: offset
     5th ARG is []string: list of fields to get back
-  returns nil, error / XRecord, nil / XRecords, nil
+    6th ARG is bool: true = returns always one record max and no more (force limit = 1) and return an XRecord always
+  returns nil, error / XRecord, nil / XRecords, nil; or nil, error / XRecords, nil
 */
 
 func (t *XTable)Select(args ...interface{}) (interface{}, error) {
@@ -74,10 +75,14 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   var offset int
   hasfields := false
   var fields XFieldSet
+  onlyone := false
   
   for i, p := range args {
-    fmt.Printf("TYPE PARAM: %T\n", p)
     switch p.(type) {
+      case bool:
+        if p.(bool) {
+          onlyone = true
+        }
       case int:
         if i == 0 { 
           haskey = true
@@ -112,10 +117,11 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
         fields = p.(XFieldSet)
     }
   }
+  if onlyone {
+    limit = 1
+    haslimit = true
+  }
 
-fmt.Println(hasconditions)
-fmt.Println(conditions)
-  
   // 2. creates fields to scan
   sqlf := ""
   item := 0
@@ -123,8 +129,11 @@ fmt.Println(conditions)
   for _, f := range t.Fields {
     fname := f.GetName()
     if hasfields {
-      fmt.Println(fields)
-//    && fname not in Fields { continue }
+      infield := false;
+      for _, fn := range fields {
+        if fn == fname { infield = true; break }
+      }
+      if !infield { continue }
     }
     if item > 0 { sqlf += ", " }
     sqlf += t.Prepend + fname
@@ -166,7 +175,7 @@ fmt.Println(conditions)
   
   fmt.Println(sql)
 
-      // 6. exec and dump result
+  // 6. exec and dump result
   cursor, err := t.Base.Exec(sql, sqldata...)
   if err != nil { return nil, err }
   defer cursor.Close()
@@ -200,10 +209,41 @@ fmt.Println(conditions)
     }
   }
   if somerecs != nil {
-    return *somerecs, nil
+    return somerecs, nil
   }
   if onerec != nil {
-    return *onerec, nil
+    return onerec, nil
+  }
+  return nil, nil
+}
+
+func (t *XTable)SelectOne(args ...interface{}) (*XRecord, error) {
+  args = append(args, true)
+  r, err := t.Select(args...)  // select only one
+  if r == nil || err != nil {
+    return nil, err
+  }
+  switch r.(type) {
+    case *XRecord: return r.(*XRecord), nil
+    case *XRecords: 
+      onerec, _ := r.(*XRecords).Get(0)
+      return onerec.(*XRecord), nil
+  }
+  return nil, nil
+}
+
+func (t *XTable)SelectAll(args ...interface{}) (*XRecords, error) {
+  args = append(args, true)
+  r, err := t.Select(args...)  // select only one
+  if err != nil {
+    return nil, err
+  }
+  if r == nil {
+    return &XRecords{}, nil
+  }
+  switch r.(type) {
+    case *XRecord: return &XRecords{r.(*XRecord)}, nil
+    case *XRecords: return r.(*XRecords), nil
   }
   return nil, nil
 }
@@ -284,20 +324,135 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
   return nil, nil
 }
 
-func (t *XTable)Update(key interface{}, record *XRecord) error {
-  return nil
+
+/*
+  Update:
+  Args are:
+  NO ARGS: error
+  1rst ARG is a simple cast (int, string, time, float) => primary key.
+  1rst ARG is a XCondition: select where XCondition, then:
+  2nd ARG is XRecord to modify
+  If first arg does not exists, the update is applied to the whole table (aka first arg is XRecord)
+
+  returns int, error. int is the quantity of modified records (always 1 if primary key)
+*/
+
+func (t *XTable)Update(args ...interface{}) (int, error) {
+  // 1. analyse params
+  haskey := false
+  var key interface{}
+  hasconditions := false
+  var conditions XConditions
+  hasrecord := false
+  var record XRecord
+
+  for _, p := range args {
+    switch p.(type) {
+      case int, float64, string, time.Time: // position 0 only
+          haskey = true
+          key = p
+      case XCondition:
+        hasconditions = true
+        conditions = XConditions{p.(XCondition)}
+      case XConditions:
+        hasconditions = true
+        conditions = p.(XConditions)
+      case XRecord:
+        hasrecord = true
+        record = p.(XRecord)
+    }
+  }
+  if !hasrecord { return 0, errors.New("Error: there is no record data to use to modify the records of the table") }
+
+  item := 0
+
+  itemdata := 1
+  sqldata := make([]interface{}, 0)
+  sqlf := ""
+  
+  for _, f := range t.Fields {
+    fname := f.GetName()
+    fd, ok := record.Get(fname)
+    if !ok { continue }
+    
+    if item > 0 { sqlf += ", " }
+    sqlf += t.Prepend + fname + " = " + "$" + strconv.Itoa(itemdata)
+    sqldata = append(sqldata, f.CreateValue(fd, t.Name, t.Base.DBType, t.Prepend))
+    item++
+    itemdata++
+  }
+  if item == 0 { return 0, errors.New("Error: there is no fields to update") }
+
+  sql := "update " + t.Name + " set " + sqlf;
+  
+  if haskey {
+    // get primary key field
+    primkey := t.GetPrimaryKey()
+    if primkey == nil {
+      return 0, errors.New("There is no primary key on in the table")
+    }
+    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    itemdata++
+  } else if hasconditions {
+    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+  }
+
+  fmt.Println(sql)
+
+  cursor, err := t.Base.Exec(sql, sqldata...)
+  if err != nil { return 0, err }
+  defer cursor.Close()
+
+  return 1, nil
 }
 
-func (t *XTable)UpdateCondition(record *XRecord, condition interface{}) error {
-  return nil
-}
+func (t *XTable)Delete(args ...interface{}) (int, error) {
+  // 1. analyse params
+  haskey := false
+  var key interface{}
+  hasconditions := false
+  var conditions XConditions
 
-func (t *XTable)Delete(key interface{}) error {
-  return nil
-}
+  for _, p := range args {
+    switch p.(type) {
+      case int, float64, string, time.Time:
+          haskey = true
+          key = p
+      case XCondition:
+        hasconditions = true
+        conditions = XConditions{p.(XCondition)}
+      case XConditions:
+        hasconditions = true
+        conditions = p.(XConditions)
+    }
+  }
 
-func (t *XTable)DeleteCondition(condition interface{}) error {
-  return nil
+  itemdata := 1
+  sqldata := make([]interface{}, 0)
+
+  sql := "delete from " + t.Name;
+  
+  if haskey {
+    // get primary key field
+    primkey := t.GetPrimaryKey()
+    if primkey == nil {
+      return 0, errors.New("There is no primary key on in the table")
+    }
+    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    itemdata++
+  } else if hasconditions {
+    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+  }
+
+  fmt.Println(sql)
+
+  cursor, err := t.Base.Exec(sql, sqldata...)
+  if err != nil { return 0, err }
+  defer cursor.Close()
+
+  return 1, nil
 }
 
 func (t *XTable)Count(condition interface{}) (int, error) {

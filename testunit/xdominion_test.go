@@ -3,7 +3,7 @@ package main
 import (
   "fmt"
   "testing"
-  "github.com/webability-go/xcore"
+//  "github.com/webability-go/xcore"
   "github.com/webability-go/xdominion"
 )
 
@@ -67,7 +67,7 @@ func TestBase(t *testing.T) {
   if err != nil {
     fmt.Println(err)
   } else {
-    for _, x := range res3.(xdominion.XRecords) {
+    for _, x := range *res3.(*xdominion.XRecords) {
       fmt.Println(x)
     }
   }
@@ -77,10 +77,10 @@ func TestBase(t *testing.T) {
     fmt.Println(err)
   } else {
     switch res4.(type) {
-      case xdominion.XRecord:
+      case *xdominion.XRecord:
         fmt.Println(res4)
-      case xdominion.XRecords:
-        for _, x := range res4.(xdominion.XRecords) {
+      case *xdominion.XRecords:
+        for _, x := range *res4.(*xdominion.XRecords) {
           fmt.Println(x)
         }
     }
@@ -91,16 +91,29 @@ func TestBase(t *testing.T) {
     fmt.Println(err)
   } else {
     switch res5.(type) {
-      case xdominion.XRecord:
+      case *xdominion.XRecord:
         fmt.Println(res5)
-      case xdominion.XRecords:
-        for _, x := range res5.(xdominion.XRecords) {
+      case *xdominion.XRecords:
+        for _, x := range *res5.(*xdominion.XRecords) {
           fmt.Println(x)
         }
     }
   }
   
+  fmt.Println("Ahora vamos a probar funciones que siempre regresan el mismo cast:")
+  res6, err := tb.SelectOne(xdominion.XConditions{xdominion.NewXCondition("f1", "=", 1), xdominion.NewXCondition("f1", "=", 2, "or")})
+  fmt.Println(res6)
+  res7, err := tb.SelectAll(xdominion.XConditions{xdominion.NewXCondition("f1", "=", 1), xdominion.NewXCondition("f1", "=", 2, "and")})
+  fmt.Println(res7)
+  res8, err := tb.SelectAll(xdominion.XConditions{xdominion.NewXCondition("f1", "=", 1)})
+  fmt.Println(res8)
+
+  res9, err := tb.SelectAll(xdominion.XFieldSet{"f1", "f4"})
+  fmt.Println(res9)
   
+
+  i, err := tb.Update( xdominion.XRecord{"f6": 3.1415927,} )
+  fmt.Println("Updated: ", i)
 }
 
 func getTableDef(base *xdominion.XBase) *xdominion.XTable {
@@ -121,6 +134,7 @@ func getTableDef(base *xdominion.XBase) *xdominion.XTable {
 }
 
 /* Test injection of a recordset into a template */
+/*
 func TestTemplate(t *testing.T) {
 
   tmpl, _ := xcore.NewXTemplateFromString(`
@@ -144,11 +158,11 @@ End of array of data
   
   tb := getTableDef(base)
   irecs, _ := tb.Select()
-  recs := irecs.(xdominion.XRecords)
+  recs := irecs.(*xdominion.XRecords)
   
   // the data must be into "result" parameter
   data := xdominion.NewXRecord()
-  data.Set("result", &recs)
+  data.Set("result", recs)
 
   fmt.Println(recs)
   fmt.Println(data)
@@ -158,6 +172,6 @@ End of array of data
   
 }
 
-
+*/
 
 

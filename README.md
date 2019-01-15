@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+V0.0.5 - 2019-01-15
+-----------------------
+- XTable.Update implemented
+- XTable.Delete implemented
+
 V0.0.4 - 2019-01-06
 -----------------------
 - Modify XRecord to match XDataset last version (xcore 0.0.4)
