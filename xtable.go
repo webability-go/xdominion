@@ -455,19 +455,64 @@ func (t *XTable)Delete(args ...interface{}) (int, error) {
   return 1, nil
 }
 
-func (t *XTable)Count(condition interface{}) (int, error) {
-  return 0, nil
+func (t *XTable)Count(args ...interface{}) (int, error) {
+  // 1. analyse params
+  hasfield := false
+  var field string
+  hasconditions := false
+  var conditions XConditions
+
+  for _, p := range args {
+    switch p.(type) {
+      case string:
+          hasfield = true
+          field = p.(string)
+      case XCondition:
+        hasconditions = true
+        conditions = XConditions{p.(XCondition)}
+      case XConditions:
+        hasconditions = true
+        conditions = p.(XConditions)
+    }
+  }
+
+//  itemdata := 1
+//  sqldata := make([]interface{}, 0)
+
+  sql := "select count("
+  if hasfield {
+    sql += "distinct " + t.Prepend + field
+  } else {
+    sql += "*"
+  }
+  sql += ") from " + t.Name;
+  
+  if hasconditions {
+    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+  }
+
+  fmt.Println(sql)
+
+  cursor, err := t.Base.Exec(sql)
+  if err != nil { return 0, err }
+  defer cursor.Close()
+
+  cantidad := 0
+  cursor.Next()
+  err = cursor.Scan(&cantidad)
+  if err != nil { return 0, err }
+  return cantidad, nil
 }
 
-func (t *XTable)Min(field string, condition interface{}) (interface{}, error) {
+func (t *XTable)Min(field string, args ...interface{}) (interface{}, error) {
   return nil, nil
 }
 
-func (t *XTable)Max(field string, condition interface{}) (interface{}, error) {
+func (t *XTable)Max(field string, args ...interface{}) (interface{}, error) {
   return nil, nil
 }
 
-func (t *XTable)Avg(field string, condition interface{}) (interface{}, error) {
+func (t *XTable)Avg(field string, args ...interface{}) (interface{}, error) {
   return nil, nil
 }
 
