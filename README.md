@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+V0.0.6 - 2019-??-??
+-----------------------
+- Added conversion between types con Get* functions
+
 V0.0.5 - 2019-01-15
 -----------------------
 - XTable.Update implemented
