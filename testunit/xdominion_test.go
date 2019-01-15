@@ -114,6 +114,10 @@ func TestBase(t *testing.T) {
 
   i, err := tb.Update( xdominion.XRecord{"f6": 3.1415927,} )
   fmt.Println("Updated: ", i)
+
+  num, err := tb.Count()
+  fmt.Println("Count: ", num)
+  
 }
 
 func getTableDef(base *xdominion.XBase) *xdominion.XTable {
