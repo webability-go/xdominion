@@ -22,6 +22,8 @@ const (
   DB_Localhost = "localhost"
 )
 
+var DEBUG bool = false
+
 type XBase struct {
   DB *sql.DB
   Logged bool

@@ -8,6 +8,8 @@ import (
 )
 
 func TestBase(t *testing.T) {
+  
+  xdominion.DEBUG = true
   // Test 1: assign a simple parameter string with some comments
   // Be sure the database exists or have an error
   /*

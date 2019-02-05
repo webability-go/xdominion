@@ -39,7 +39,9 @@ func (t *XTable)Synchronize() error {
   }
   query += ")"
   
-  fmt.Println(query)
+  if DEBUG {
+    fmt.Println(query)
+  }
   
   cursor, err := t.Base.Exec(query)
   if err != nil { return err }
@@ -192,7 +194,9 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
     sql += " offset " + strconv.Itoa(offset)
   }
   
-  fmt.Println(sql)
+  if DEBUG {
+    fmt.Println(sql)
+  }
 
   // 6. exec and dump result
   cursor, err := t.Base.Exec(sql, sqldata...)
@@ -417,7 +421,9 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
   }
 
-  fmt.Println(sql)
+  if DEBUG {
+    fmt.Println(sql)
+  }
 
   cursor, err := t.Base.Exec(sql, sqldata...)
   if err != nil { return 0, err }
@@ -465,7 +471,9 @@ func (t *XTable)Delete(args ...interface{}) (int, error) {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
   }
 
-  fmt.Println(sql)
+  if DEBUG {
+    fmt.Println(sql)
+  }
 
   cursor, err := t.Base.Exec(sql, sqldata...)
   if err != nil { return 0, err }
@@ -510,7 +518,9 @@ func (t *XTable)Count(args ...interface{}) (int, error) {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
   }
 
-  fmt.Println(sql)
+  if DEBUG {
+    fmt.Println(sql)
+  }
 
   cursor, err := t.Base.Exec(sql)
   if err != nil { return 0, err }
