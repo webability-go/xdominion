@@ -24,6 +24,13 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.7 - 2019-02-05
+-----------------------
+- Added XOrderBy, XOrder structures
+- Added XGroupBy, XGroup structures
+- Added XHaving structures
+- Error corrected on xrecord.GetTime when the field comes NIL from database
+
 V0.0.6 - 2019-01-15
 -----------------------
 - Added conversion between types con Get* functions
@@ -65,7 +72,22 @@ V0.0.1 - 2018-11-14
 Manual:
 =======================
 
-The manual is still under construction.
+1. Overview
+------------------------
+
+XDominion is a dataase abstraction layer, to build and use objects of data instead of building SQL queries. 
+The code is portable between databases with changing the implementation, since you don't use direct incompatible SQL sentences.
+
+The library is build over 3 main objects:
+- XBase: database connector and cursors to build queries and manipulation language
+- - Other included objects: XCursor
+- XTable: the table definition, data access function/structures and definition manipulation language
+- - Other included objects: XField*, XConstraints, XContraint, XOrderby, XConditions, XCondition
+- XRecord: the results and data to interchange with the database
+- - Other included objects: XRecords
+
+
+Examples:
 
 Some code to start working:
 
@@ -187,6 +209,20 @@ Query by Where:
     }
   }
 ```
+
+
+2. Reference
+------------------------
+
+XBase
+-----
+
+XTable
+------
+
+XRecord
+-------
+
 
 
 ---

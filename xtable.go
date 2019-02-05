@@ -68,11 +68,13 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
   hasconditions := false
   var conditions XConditions
   hasorder := false
-  var order XOrderBy
+  var order XOrder
   haslimit := false
   var limit int
   hasoffset := false
   var offset int
+  hasgroup := false
+  var group XGroup
   hasfields := false
   var fields XFieldSet
   onlyone := false
@@ -111,7 +113,16 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
         conditions = p.(XConditions)
       case XOrderBy:
         hasorder = true
-        order = p.(XOrderBy)
+        order = XOrder{p.(XOrderBy)}
+      case XOrder:
+        hasorder = true
+        order = p.(XOrder)
+      case XGroupBy:
+        hasgroup = true
+        group = XGroup{p.(XGroupBy)}
+      case XGroup:
+        hasgroup = true
+        group = p.(XGroup)
       case XFieldSet:
         hasfields = true
         fields = p.(XFieldSet)
@@ -160,10 +171,18 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
   }
   
+  // group by, needs a fieldset
+  if hasgroup {
+    sql += " group by " + group.CreateGroup(t, t.Base.DBType)
+  }
+
   // 4. build order by query
   if hasorder {
-    sql += fmt.Sprint(order)
+    sql += " order by " + order.CreateOrder(t, t.Base.DBType)
   }
+  
+  // having, needs a group by, set of conditions
+  
   
   // 5. Limits
   if haslimit {
