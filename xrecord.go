@@ -164,7 +164,9 @@ func (r *XRecord)Del(key string) {
 func (r *XRecord)GetTime(key string) (time.Time, bool) {
   v, ok := (*r)[key]
   if ok {
-    return v.(time.Time), true
+    if v != nil {
+      return v.(time.Time), true
+    }
   }
   return time.Time{}, false
 }
