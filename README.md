@@ -30,6 +30,7 @@ v0.0.7 - 2019-02-05
 - Added XGroupBy, XGroup structures
 - Added XHaving structures
 - Error corrected on xrecord.GetTime when the field comes NIL from database
+- Added DEBUG main xdominion global variable. Set to true to print all the built queries
 
 V0.0.6 - 2019-01-15
 -----------------------
