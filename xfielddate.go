@@ -20,9 +20,9 @@ func (f XFieldDate)CreateField(prepend string, DB string, ifText *bool) string {
   return prepend + f.Name + ftype + extra
 }
 
-// creates a string representation of the value of the field for insert/update
+// creates a string representation of the value of the field for insert/update and queries where
 func (f XFieldDate)CreateValue(v interface{}, table string, DB string, id string) string {
-  return fmt.Sprint(v)
+  return "'" + fmt.Sprint(v) + "'"
 }
 
 // creates the sequence used by the field (only autoincrement fields)
