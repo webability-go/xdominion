@@ -15,14 +15,20 @@ TO DO:
 ======
 
 - text, float, time, date, lob fields
-- Conditions
+- Conditions with "?"
+- Joins
 - Sub Queries
-- Group and report funcions
+- Group and report functions
 - Synchro to upgrade DB tables and fields
 - MySQL, Oracle, other DBs
 
 Version Changes Control
 =======================
+
+v0.0.8 - 2019-02-14
+-----------------------
+- XCondition works with string queries (not yet with "?" parameters)
+- Correction done on CreateValue for string fields (text, varchar, dates)
 
 v0.0.7 - 2019-02-05
 -----------------------
