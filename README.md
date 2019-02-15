@@ -25,6 +25,12 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.9 - 2019-02-15
+-----------------------
+- New funcion for field: GetValue created
+- Error corrected on conflict between CreateValue (with ' for strings) and GetValue (for use with $d to inject into queries)
+
+
 v0.0.8 - 2019-02-14
 -----------------------
 - XCondition works with string queries (not yet with "?" parameters)
