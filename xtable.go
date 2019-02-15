@@ -167,7 +167,7 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
       return nil, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
-    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
@@ -322,7 +322,7 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
       sqlv += ", "
     }
     sqlf += t.Prepend + fname
-    sqldata = append(sqldata, f.CreateValue(v, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, f.GetValue(v, t.Name, t.Base.DBType, t.Prepend))
     sqlv += "$" + strconv.Itoa(item+1)
     item++
   }
@@ -400,7 +400,7 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
     
     if item > 0 { sqlf += ", " }
     sqlf += t.Prepend + fname + " = " + "$" + strconv.Itoa(itemdata)
-    sqldata = append(sqldata, f.CreateValue(fd, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, f.GetValue(fd, t.Name, t.Base.DBType, t.Prepend))
     item++
     itemdata++
   }
@@ -415,7 +415,7 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
       return 0, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
-    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
@@ -465,7 +465,7 @@ func (t *XTable)Delete(args ...interface{}) (int, error) {
       return 0, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
-    sqldata = append(sqldata, primkey.CreateValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
     sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
