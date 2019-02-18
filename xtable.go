@@ -166,12 +166,17 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
     if primkey == nil {
       return nil, errors.New("There is no primary key on in the table")
     }
-    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
     sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
-    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+    scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+    sql += " where " + scond
+    for _, v := range vars {
+      sqldata = append(sqldata, v)
+    }
   }
+  fmt.Println(sqldata)
   
   // group by, needs a fieldset
   if hasgroup {
@@ -217,7 +222,12 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
     // creates a XRecord with result
     xr := &XRecord{}
     for i, f := range fieldslist {
-      xr.Set(f, result[i])
+      switch result[i].(type) {
+        case []byte: // special case returned by mysql for string :S
+          xr.Set(f, string(result[i].([]byte)))
+        default: 
+          xr.Set(f, result[i])
+      }
     }
     
     if somerecs != nil {
@@ -323,22 +333,36 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
     }
     sqlf += t.Prepend + fname
     sqldata = append(sqldata, f.GetValue(v, t.Name, t.Base.DBType, t.Prepend))
-    sqlv += "$" + strconv.Itoa(item+1)
+    sqlv += getQueryString(t.Base.DBType, item+1)
     item++
   }
   sql := "insert into " + t.Name + " ("+sqlf+") values ("+sqlv+")";
 
   if primkey != "" {
-    sql += " returning " + primkey;
+    if t.Base.DBType == DB_Postgres {
+      sql += " returning " + primkey;
+    }
+
+    if DEBUG {
+      fmt.Println(sql)
+    }
+
     var key interface{}
     cursor, err := t.Base.Exec(sql, sqldata...)
     if err != nil { return nil, err }
     defer cursor.Close()
-    cursor.Next()
-    err = cursor.Scan(&key)
-    if err != nil { return nil, err }
-    t.InsertedKey = key
+
+    if t.Base.DBType == DB_Postgres {
+      cursor.Next()
+      err = cursor.Scan(&key)
+      if err != nil { return nil, err }
+      t.InsertedKey = key
+    }
     return key, nil
+  }
+
+  if DEBUG {
+    fmt.Println(sql)
   }
 
   cursor, err := t.Base.Exec(sql, sqldata...)
@@ -399,7 +423,7 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
     if !ok { continue }
     
     if item > 0 { sqlf += ", " }
-    sqlf += t.Prepend + fname + " = " + "$" + strconv.Itoa(itemdata)
+    sqlf += t.Prepend + fname + " = " + getQueryString(t.Base.DBType, itemdata)
     sqldata = append(sqldata, f.GetValue(fd, t.Name, t.Base.DBType, t.Prepend))
     item++
     itemdata++
@@ -414,11 +438,15 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
     if primkey == nil {
       return 0, errors.New("There is no primary key on in the table")
     }
-    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
     sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
-    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+    scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+    sql += " where " + scond
+    for _, v := range vars {
+      sqldata = append(sqldata, v)
+    }
   }
 
   if DEBUG {
@@ -464,11 +492,15 @@ func (t *XTable)Delete(args ...interface{}) (int, error) {
     if primkey == nil {
       return 0, errors.New("There is no primary key on in the table")
     }
-    sql += " where " + t.Prepend + primkey.GetName() + " = $" + strconv.Itoa(itemdata)
+    sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
     sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
     itemdata++
   } else if hasconditions {
-    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+    scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+    sql += " where " + scond
+    for _, v := range vars {
+      sqldata = append(sqldata, v)
+    }
   }
 
   if DEBUG {
@@ -503,8 +535,8 @@ func (t *XTable)Count(args ...interface{}) (int, error) {
     }
   }
 
-//  itemdata := 1
-//  sqldata := make([]interface{}, 0)
+  itemdata := 1
+  sqldata := make([]interface{}, 0)
 
   sql := "select count("
   if hasfield {
@@ -515,14 +547,18 @@ func (t *XTable)Count(args ...interface{}) (int, error) {
   sql += ") from " + t.Name;
   
   if hasconditions {
-    sql += " where " + conditions.CreateConditions(t, t.Base.DBType)
+    scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+    sql += " where " + scond
+    for _, v := range vars {
+      sqldata = append(sqldata, v)
+    }
   }
 
   if DEBUG {
     fmt.Println(sql)
   }
 
-  cursor, err := t.Base.Exec(sql)
+  cursor, err := t.Base.Exec(sql, sqldata...)
   if err != nil { return 0, err }
   defer cursor.Close()
 
@@ -558,3 +594,14 @@ func (t *XTable)GetField(name string) XFieldDef {
   }
   return nil
 }
+
+func getQueryString(DB string, item int) string {
+  q := ""
+  switch DB {
+    case DB_Postgres: q = fmt.Sprintf("$%d", item)
+    case DB_MySQL: q = "?"
+  }
+  return q
+}
+
+

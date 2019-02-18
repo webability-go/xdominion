@@ -40,6 +40,9 @@ func (c *XConstraints)CreateConstraints(prepend string, name string, DB string) 
   }
   ai := c.Get(AI)
   if ai != nil {
+    if DB == DB_MySQL {
+      cnt += " auto_increment"
+    }
     // mysql, mssql: build auto_increment and indentity(1,1). pgsql ya tiene un tipo "serial" desde el campo mismo
   }
   nn := c.Get(NN)
@@ -48,7 +51,7 @@ func (c *XConstraints)CreateConstraints(prepend string, name string, DB string) 
   }
   fk := c.Get(FK)
   if fk != nil {
-    cnt += "references " + fk.Data[0] + "(" + fk.Data[1] + ")"
+    cnt += " references " + fk.Data[0] + "(" + fk.Data[1] + ")"
   }
   return cnt
 }

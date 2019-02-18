@@ -4,14 +4,24 @@ package xdominion
   The XOrderBy is an array of field names
 */
 
+const (
+  ASC =      "asc"
+  DESC =     "desc"
+)
+
 type XOrder []XOrderBy
 
 func (o *XOrder)CreateOrder(table *XTable, DB string) string {
   order := ""
 
+  item := 0
   for _, xo := range *o {
     // , entre cada uno
+    if item > 0 {
+      order += ", "
+    }
     order += xo.GetOrder(table, DB)
+    item++
   }
   return order
 }

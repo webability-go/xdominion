@@ -1,10 +1,11 @@
 package xdominion
 
 import (
-//  "fmt"
+  "fmt"
   "log"
   "database/sql"
   _ "github.com/lib/pq"
+  _ "github.com/go-sql-driver/mysql"
 )
 
 /* IMPORTANT NOTE:
@@ -15,10 +16,11 @@ As of 2018/12/01, only postgres is supported for now
 
 const (
   // Version of XDominion
-  VERSION = "0.0.9"
+  VERSION = "0.0.10"
 
   // The distinct supported databases
-  DB_Postgres = "postgres"
+  DB_Postgres  = "postgres"
+  DB_MySQL     = "mysql"
   DB_Localhost = "localhost"
 )
 
@@ -42,14 +44,29 @@ func (b *XBase)Logon() {
   b.Logged = true
 
   var err error
-  src := b.DBType + "://" + b.Username + ":" + b.Password + "@" + b.Host + "/" + b.Database
-  if !b.SSL {
-    src += "?sslmode=disable"
+  var src string
+  switch b.DBType {
+    case DB_Postgres:
+      src = b.DBType + "://" + b.Username + ":" + b.Password + "@" + b.Host + "/" + b.Database
+      if !b.SSL {
+        src += "?sslmode=disable"
+      }
+    case DB_MySQL:
+      if b.Host == DB_Localhost {
+        src = b.Username + ":" + b.Password + "@" + "/" + b.Database
+      } else {
+        src = b.Username + ":" + b.Password + "@" + b.Host + "/" + b.Database
+      }
+  }
+  
+  if (DEBUG) {
+    fmt.Println("DB Source:", src)
   }
 
-  b.DB, err = sql.Open("postgres", src)
+  b.DB, err = sql.Open(b.DBType, src)
   if err != nil {
     log.Panic(err)
+    return
   }
 
   if err = b.DB.Ping(); err != nil {

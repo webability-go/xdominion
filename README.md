@@ -25,11 +25,18 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.10 - 2019-02-18
+-----------------------
+- Support for MySQL added
+- Queries and conditions now uses "?" or "$x" for parameters
+- Orderby implemented
+- like and ilike implemented for text fields
+- fields.GetValue function added when the code needs the raw string value (not like CreateValue where then value is created with ' for strings)
+
 v0.0.9 - 2019-02-15
 -----------------------
 - New funcion for field: GetValue created
 - Error corrected on conflict between CreateValue (with ' for strings) and GetValue (for use with $d to inject into queries)
-
 
 v0.0.8 - 2019-02-14
 -----------------------

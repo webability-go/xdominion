@@ -4,6 +4,19 @@ import (
   "fmt"
 )
 
+var fieldintegertypes = map[string]string{
+    DB_Postgres: "integer",
+    DB_MySQL: "integer",
+/*
+    DB_Base::MSSQL => array(
+      DB_Field::INTEGER => "int"
+    ),
+    DB_Base::ORACLE => array(
+      DB_Field::INTEGER => "number(16)"
+    )
+*/
+  }
+
 type XFieldInteger struct
 {
   Name string
@@ -12,15 +25,30 @@ type XFieldInteger struct
 
 // creates the name of the field with its type (to create the table)
 func (f XFieldInteger)CreateField(prepend string, DB string, ifText *bool) string {
-  ftype := " integer"
-  if IsAutoIncrement(f) {
-    ftype = " serial"
+  field := prepend + f.Name
+  if DB == DB_Postgres && f.IsAutoIncrement() {
+    field += " serial"
+  } else {
+    field += " " + fieldintegertypes[DB]
   }
+
+  /*
+    if ($this->checks != null)
+      $line .= $this->checks->createCheck($id.$this->name, $DB);
+    else
+    {
+      if ($DB == DB_Base::MSSQL)
+      {
+        $line .= " NULL";
+      }
+    }
+ */
+
   extra := ""
   if f.Constraints != nil {
     extra = f.Constraints.CreateConstraints(prepend, f.Name, DB)
   }
-  return prepend + f.Name + ftype + extra
+  return field + extra
 }
 
 // creates a string representation of the value of the field for insert/update
@@ -57,3 +85,13 @@ func (f XFieldInteger)GetType() int {
 func (f XFieldInteger)GetConstraints() XConstraints {
   return f.Constraints
 }
+
+// Is it autoincrement
+func (f XFieldInteger)IsAutoIncrement() bool {
+  if (f.Constraints != nil) {
+    c := f.Constraints.Get(AI)
+    if c != nil { return true }
+  }
+  return false;
+}
+
