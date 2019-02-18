@@ -17,8 +17,8 @@ const (
   OP_NotIn = "not in"
   OP_Like = "like"
   OP_NotLike = "not like"
-  OP_Match = "match"
-  OP_NotMatch = "not match"
+  OP_iLike = "ilike"
+  OP_NotiLike = "not ilike"
 )
 
 /*
@@ -31,13 +31,19 @@ type XConditions []XCondition
 // XConditions
 // =====================
 
-func (c *XConditions)CreateConditions(table *XTable, DB string) string {
+func (c *XConditions)CreateConditions(table *XTable, DB string, baseindex int) (string, []string) {
   cond := ""
+  data := []string{}
 
   for _, xc := range *c {
-    cond += xc.GetCondition(table, DB)
+    scond, sdata, indexused := xc.GetCondition(table, DB, baseindex)
+    cond += scond
+    data = append(data, sdata)
+    if indexused {
+      baseindex ++
+    }
   }
-  return cond
+  return cond, data
 }
 
 /*
@@ -69,12 +75,12 @@ func NewXCondition(field string, operator string, limit interface{}, args ...int
   return c
 }
 
-func (c *XCondition)GetCondition(table *XTable, DB string) string {
+func (c *XCondition)GetCondition(table *XTable, DB string, baseindex int) (string, string, bool) {
   
     field := table.GetField(c.Field);
     
     if field == nil {
-      return ""
+      return "", "", false
     }
     
     cond := ""
@@ -86,36 +92,60 @@ func (c *XCondition)GetCondition(table *XTable, DB string) string {
     if c.AtomOpen > 0 {
       cond += strings.Repeat("(", c.AtomOpen)
     }
+    indexused := true
+    value := ""
     switch c.Operator {
       case OP_Equal:
         if c.Limit == nil {
-          cond += table.Prepend + field.GetName() + " is " + field.CreateValue(nil, table.Name, DB, table.Prepend);
+          cond += table.Prepend + field.GetName() + " is null";
+          indexused = false
         } else {
-          cond += table.Prepend + field.GetName() + OP_Equal + field.CreateValue(c.Limit, table.Name, DB, table.Prepend);
+          value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+          cond += table.Prepend + field.GetName() + OP_Equal + getQueryString(DB, baseindex)
         }
       case OP_NotEqual:
         if c.Limit == nil {
-          cond += table.Prepend + field.GetName() + " is not " + field.CreateValue(nil, table.Name, DB, table.Prepend);
+          cond += table.Prepend + field.GetName() + " is not null";
+          indexused = false
         } else {
-          cond += table.Prepend + field.GetName() + OP_NotEqual + field.CreateValue(c.Limit, table.Name, DB, table.Prepend);
+          value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+          cond += table.Prepend + field.GetName() + OP_NotEqual + getQueryString(DB, baseindex)
         }
       case OP_Superior, OP_StrictSuperior, OP_Inferior, OP_StrictInferior:
-        cond += table.Prepend + field.GetName() + c.Operator + field.CreateValue(c.Limit, table.Name, DB, table.Prepend);
+        value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+        cond += table.Prepend + field.GetName() + c.Operator + getQueryString(DB, baseindex)
       case OP_In, OP_NotIn:
-        cond += table.Prepend + field.GetName() + c.Operator + fmt.Sprint(c.Limit)
+        value = fmt.Sprint(c.Limit)
+        cond += table.Prepend + field.GetName() + c.Operator + getQueryString(DB, baseindex)
       case OP_Like:
-        cond += table.Prepend + field.GetName() + " ilike '%" + fmt.Sprint(c.Limit) + "%'"
+        value = fmt.Sprint(c.Limit)
+        cond += table.Prepend + field.GetName() + " like " + getQueryString(DB, baseindex)
       case OP_NotLike:
-        cond += table.Prepend + field.GetName() + " not ilike '%" + fmt.Sprint(c.Limit) + "%'"
-      case OP_Match:
-        cond += table.Prepend + field.GetName() + " ilike '" + fmt.Sprint(c.Limit) + "'"
-      case OP_NotMatch:
-        cond += table.Prepend + field.GetName() + " not ilike '" + fmt.Sprint(c.Limit) + "'"
+        value = fmt.Sprint(c.Limit)
+        cond += table.Prepend + field.GetName() + " not like " + getQueryString(DB, baseindex)
+      case OP_iLike:
+        value = fmt.Sprint(c.Limit)
+        switch DB {
+          case DB_Postgres:
+            cond += table.Prepend + field.GetName() + " ilike " + getQueryString(DB, baseindex)
+          case DB_MySQL:
+            cond += "lower(" + table.Prepend + field.GetName() + ") like lower(" + getQueryString(DB, baseindex) + ")"
+        }
+      case OP_NotiLike:
+        value = fmt.Sprint(c.Limit)
+        switch DB {
+          case DB_Postgres:
+            cond += table.Prepend + field.GetName() + " not ilike " + getQueryString(DB, baseindex)
+          case DB_MySQL:
+            cond += "lower(" + table.Prepend + field.GetName() + ") not like lower(" + getQueryString(DB, baseindex) + ")"
+        }
+      default:
+        // warning: operator not supported
     }
     if c.AtomClose > 0 {
       cond += strings.Repeat(")", c.AtomClose)
     }
     
-    return cond
+    return cond, value, indexused
   }
 
