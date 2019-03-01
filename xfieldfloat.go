@@ -25,11 +25,6 @@ func (f XFieldFloat)CreateValue(v interface{}, table string, DB string, id strin
   return fmt.Sprint(v)
 }
 
-// gets directly the value of the field for insert/update and queries where
-func (f XFieldFloat)GetValue(v interface{}, table string, DB string, id string) string {
-  return fmt.Sprint(v)
-}
-
 // creates the sequence used by the field (only autoincrement fields)
 func (f XFieldFloat)CreateSequence(table string) string {
   return ""

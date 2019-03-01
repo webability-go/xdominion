@@ -6,9 +6,9 @@ package xdominion
 
 type XHaving []XCondition
 
-func (h *XHaving)CreateHaving(table *XTable, DB string, baseindex int) (string, []string) {
+func (h *XHaving)CreateHaving(table *XTable, DB string, baseindex int) (string, []interface{}) {
   having := ""
-  data := []string{}
+  data := []interface{}{}
 
   for _, xh := range *h {
     shaving, sdata, indexused := xh.GetCondition(table, DB, baseindex)

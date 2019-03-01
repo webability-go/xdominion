@@ -15,15 +15,21 @@ TO DO:
 ======
 
 - text, float, time, date, lob fields
-- Conditions with "?"
 - Joins
 - Sub Queries
 - Group and report functions
 - Synchro to upgrade DB tables and fields
-- MySQL, Oracle, other DBs
+- Oracle, Informix, Mongo, other DBs
 
 Version Changes Control
 =======================
+
+v0.0.11 - 2019-03-01
+-----------------------
+- Many correction on Mysql support to make it work correctly
+- Removed GetValue function from FieldDef
+- "?" implemented for fields, conditions and having queries (in select, insert, update, delete statements)
+- Values are directly passed to the query with "?", not a string representation of them
 
 v0.0.10 - 2019-02-18
 -----------------------

@@ -31,15 +31,15 @@ type XConditions []XCondition
 // XConditions
 // =====================
 
-func (c *XConditions)CreateConditions(table *XTable, DB string, baseindex int) (string, []string) {
+func (c *XConditions)CreateConditions(table *XTable, DB string, baseindex int) (string, []interface{}) {
   cond := ""
-  data := []string{}
+  data := []interface{}{}
 
   for _, xc := range *c {
     scond, sdata, indexused := xc.GetCondition(table, DB, baseindex)
     cond += scond
-    data = append(data, sdata)
     if indexused {
+      data = append(data, sdata)
       baseindex ++
     }
   }
@@ -75,7 +75,7 @@ func NewXCondition(field string, operator string, limit interface{}, args ...int
   return c
 }
 
-func (c *XCondition)GetCondition(table *XTable, DB string, baseindex int) (string, string, bool) {
+func (c *XCondition)GetCondition(table *XTable, DB string, baseindex int) (string, interface{}, bool) {
   
     field := table.GetField(c.Field);
     
@@ -93,14 +93,14 @@ func (c *XCondition)GetCondition(table *XTable, DB string, baseindex int) (strin
       cond += strings.Repeat("(", c.AtomOpen)
     }
     indexused := true
-    value := ""
+    var value interface{} = nil
     switch c.Operator {
       case OP_Equal:
         if c.Limit == nil {
           cond += table.Prepend + field.GetName() + " is null";
           indexused = false
         } else {
-          value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+          value = c.Limit
           cond += table.Prepend + field.GetName() + OP_Equal + getQueryString(DB, baseindex)
         }
       case OP_NotEqual:
@@ -108,15 +108,15 @@ func (c *XCondition)GetCondition(table *XTable, DB string, baseindex int) (strin
           cond += table.Prepend + field.GetName() + " is not null";
           indexused = false
         } else {
-          value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+          value = c.Limit
           cond += table.Prepend + field.GetName() + OP_NotEqual + getQueryString(DB, baseindex)
         }
       case OP_Superior, OP_StrictSuperior, OP_Inferior, OP_StrictInferior:
-        value = field.GetValue(c.Limit, table.Name, DB, table.Prepend)
+        value = c.Limit
         cond += table.Prepend + field.GetName() + c.Operator + getQueryString(DB, baseindex)
       case OP_In, OP_NotIn:
-        value = fmt.Sprint(c.Limit)
-        cond += table.Prepend + field.GetName() + c.Operator + getQueryString(DB, baseindex)
+        cond += table.Prepend + field.GetName() + " " + c.Operator + " " + c.Limit.(string)
+        indexused = false
       case OP_Like:
         value = fmt.Sprint(c.Limit)
         cond += table.Prepend + field.GetName() + " like " + getQueryString(DB, baseindex)
