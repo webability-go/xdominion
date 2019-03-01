@@ -18,8 +18,6 @@ type XFieldDef interface {
   CreateField(prepend string, DB string, ifText *bool) string
   // creates a string representation of the value of the field for insert/update with ' for text
   CreateValue(v interface{}, table string, DB string, id string) string
-  // creates a string representation of the value of the field for insert/update
-  GetValue(v interface{}, table string, DB string, id string) string
   // creates the sequence used by the field (only autoincrement fields)
   CreateSequence(table string) string
   // creates the index used by the field (normal, unique, multi, multi unique)

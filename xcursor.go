@@ -26,7 +26,7 @@ func (c *Cursor)Close() {
 
 func (c *Cursor)BeginTransaction() {
   if c.Transactional {
-    log.Panic(errors.New("A transation has already started in cursor"))
+    log.Panic(errors.New("A transaction has already started in cursor"))
   }
   c.Transactional = true
 }

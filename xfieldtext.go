@@ -25,11 +25,6 @@ func (f XFieldText)CreateValue(v interface{}, table string, DB string, id string
   return "'" + fmt.Sprint(v) + "'"
 }
 
-// gets directly the value of the field for insert/update and queries where
-func (f XFieldText)GetValue(v interface{}, table string, DB string, id string) string {
-  return fmt.Sprint(v)
-}
-
 // creates the sequence used by the field (only autoincrement fields)
 func (f XFieldText)CreateSequence(table string) string {
   return ""

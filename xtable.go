@@ -167,7 +167,7 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
       return nil, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
-    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, key)
     itemdata++
   } else if hasconditions {
     scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
@@ -176,7 +176,9 @@ func (t *XTable)Select(args ...interface{}) (interface{}, error) {
       sqldata = append(sqldata, v)
     }
   }
-  fmt.Println(sqldata)
+  if (DEBUG) {
+    fmt.Println(sqldata)
+  }
   
   // group by, needs a fieldset
   if hasgroup {
@@ -324,15 +326,15 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
       } else { continue }
     }
 
-    if IsAutoIncrement(f) && v.(int) == 0 { continue }
     if IsPrimaryKey(f) { primkey = t.Prepend + fname }
+    if IsAutoIncrement(f) && v.(int) == 0 { continue }
 
     if item > 0 {
       sqlf += ", "
       sqlv += ", "
     }
     sqlf += t.Prepend + fname
-    sqldata = append(sqldata, f.GetValue(v, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, v)
     sqlv += getQueryString(t.Base.DBType, item+1)
     item++
   }
@@ -345,6 +347,7 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
 
     if DEBUG {
       fmt.Println(sql)
+      fmt.Println(sqldata)
     }
 
     var key interface{}
@@ -363,6 +366,7 @@ func (t *XTable)Insert(data interface{}) (interface{}, error) {
 
   if DEBUG {
     fmt.Println(sql)
+    fmt.Println(sqldata)
   }
 
   cursor, err := t.Base.Exec(sql, sqldata...)
@@ -424,7 +428,7 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
     
     if item > 0 { sqlf += ", " }
     sqlf += t.Prepend + fname + " = " + getQueryString(t.Base.DBType, itemdata)
-    sqldata = append(sqldata, f.GetValue(fd, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, fd)
     item++
     itemdata++
   }
@@ -439,7 +443,7 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
       return 0, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
-    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, key)
     itemdata++
   } else if hasconditions {
     scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
@@ -493,7 +497,7 @@ func (t *XTable)Delete(args ...interface{}) (int, error) {
       return 0, errors.New("There is no primary key on in the table")
     }
     sql += " where " + t.Prepend + primkey.GetName() + " = " + getQueryString(t.Base.DBType, itemdata)
-    sqldata = append(sqldata, primkey.GetValue(key, t.Name, t.Base.DBType, t.Prepend))
+    sqldata = append(sqldata, key)
     itemdata++
   } else if hasconditions {
     scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)

@@ -3,6 +3,7 @@ package xdominion
 import (
   "fmt"
   "log"
+  "os"
   "database/sql"
   _ "github.com/lib/pq"
   _ "github.com/go-sql-driver/mysql"
@@ -10,13 +11,13 @@ import (
 
 /* IMPORTANT NOTE:
 Because of import structure for GO, you need to import the database drivers you will need to connect to.
-As of 2018/12/01, only postgres is supported for now
+As of 2018/12/01, only postgres and mysql are supported for now
 */
 
 
 const (
   // Version of XDominion
-  VERSION = "0.0.10"
+  VERSION = "0.0.11"
 
   // The distinct supported databases
   DB_Postgres  = "postgres"
@@ -35,6 +36,7 @@ type XBase struct {
   Database string
   Host string
   SSL bool
+  Logger *log.Logger
 }
 
 func (b *XBase)Logon() {
@@ -42,6 +44,10 @@ func (b *XBase)Logon() {
     return
   }
   b.Logged = true
+  
+  if b.Logger == nil {
+    b.Logger = log.New(os.Stderr, "XDominion: ", log.LstdFlags)
+  }
 
   var err error
   var src string
@@ -92,4 +98,16 @@ func (b *XBase)CursorTransactional() *Cursor {
   c.BeginTransaction()
   return c
 }
+/*
+func (b *XBase)BeginTransaction() {
+  b.DB.Begin()
+}
 
+func (b *XBase)Commit() {
+  b.DB.Commit()
+}
+
+func (b *XBase)Rollback() {
+  b.DB.Rollback()
+}
+*/
