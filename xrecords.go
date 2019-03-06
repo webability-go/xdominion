@@ -2,7 +2,7 @@ package xdominion
 
 import (
   "fmt"
-//  "time"
+  "time"
   
   "github.com/webability-go/xcore"
 )
@@ -93,6 +93,15 @@ func (d *XRecords)GetDataFloat(key string) (float64, bool) {
     }
   }
   return 0, false
+}
+
+func (d *XRecords)GetDataTime(key string) (time.Time, bool) {
+  if val, ok := d.GetData(key); ok {
+    switch val.(type) {
+      case time.Time: return val.(time.Time), true
+    }
+  }
+  return time.Time{}, false
 }
 
 func (r *XRecords)GetCollection(key string) (xcore.XDatasetCollectionDef, bool) {

@@ -13,7 +13,6 @@ import (
 
 type XRecordDef interface {
   xcore.XDatasetDef
-  GetTime(string) (time.Time, bool)
 }
 
 type XRecord map[string]interface{}
@@ -114,6 +113,16 @@ func (r *XRecord)GetFloat(key string) (float64, bool) {
   return 0, false
 }
 
+func (r *XRecord)GetTime(key string) (time.Time, bool) {
+  v, ok := (*r)[key]
+  if ok {
+    if v != nil {
+      return v.(time.Time), true
+    }
+  }
+  return time.Time{}, false
+}
+
 func (r *XRecord)GetStringCollection(key string) ([]string, bool) {
   if val, ok := (*r)[key]; ok {
     switch val.(type) {
@@ -154,23 +163,19 @@ func (r *XRecord)GetFloatCollection(key string) ([]float64, bool) {
   return nil, false
 }
 
+func (r *XRecord)GetTimeCollection(key string) ([]time.Time, bool) {
+  if val, ok := (*r)[key]; ok {
+    switch val.(type) {
+      case []time.Time: return val.([]time.Time), true
+      case time.Time: return []time.Time{val.(time.Time)}, true
+    }
+  }
+  return nil, false
+}
+
 func (r *XRecord)Del(key string) {
   delete(*r, key)
 }
-
-
-
-
-func (r *XRecord)GetTime(key string) (time.Time, bool) {
-  v, ok := (*r)[key]
-  if ok {
-    if v != nil {
-      return v.(time.Time), true
-    }
-  }
-  return time.Time{}, false
-}
-
 
 
 

@@ -24,6 +24,9 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.12 - 2019-
+-----------------------
+
 v0.0.11 - 2019-03-01
 -----------------------
 - Many correction on Mysql support to make it work correctly
