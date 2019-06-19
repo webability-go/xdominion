@@ -268,8 +268,7 @@ func (t *XTable)SelectOne(args ...interface{}) (*XRecord, error) {
 }
 
 func (t *XTable)SelectAll(args ...interface{}) (*XRecords, error) {
-  args = append(args, true)
-  r, err := t.Select(args...)  // select only one
+  r, err := t.Select(args...)  // select all
   if err != nil {
     return nil, err
   }

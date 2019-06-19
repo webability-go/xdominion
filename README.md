@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.13 - 2019-06-19
+-----------------------
+- Error corrected on XTable.SelectAll. It was not working as expected
+- Error corrected on XRecord.GetString. was returning "<nil>" instead of "" when the database field was null
+
 v0.0.12 - 2019-03-06
 -----------------------
 - Support for Time functions added in the XRecord (instanciated from XDatasetDef)

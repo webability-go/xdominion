@@ -62,6 +62,7 @@ func (r *XRecord)GetCollection(key string) (xcore.XDatasetCollectionDef, bool) {
 func (r *XRecord)GetString(key string) (string, bool) {
   if val, ok := (*r)[key]; ok {
     switch val.(type) {
+      case nil: return "", false
       case string: return val.(string), true
       default: return fmt.Sprint(val), true
     }
