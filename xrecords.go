@@ -113,4 +113,11 @@ func (r *XRecords)GetCollection(key string) (xcore.XDatasetCollectionDef, bool) 
   return nil, false
 }
 
+func (r *XRecords)Clone() xcore.XDatasetCollectionDef {
+  cloned := &XRecords{}
+  for _, val := range *r {
+    *cloned = append(*cloned, val.Clone())
+  }
+  return cloned
+}
 
