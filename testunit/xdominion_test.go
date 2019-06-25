@@ -120,6 +120,17 @@ func TestBase(t *testing.T) {
   num, err := tb.Count()
   fmt.Println("Count: ", num)
   
+  res10, err := tb.SelectAll(xdominion.XFieldSet{"f1", "f6"})
+  for _, r := range *res10 {
+    for _, f := range *(r.(*xdominion.XRecord)) {
+      fmt.Printf("%T %v: ", f, f)
+    }
+  }
+  
+  res11 := res6.Clone()
+  
+  fmt.Println(res11)
+  
 }
 
 func getTableDef(base *xdominion.XBase) *xdominion.XTable {

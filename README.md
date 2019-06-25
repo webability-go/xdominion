@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.14 - 2019-06-25
+-----------------------
+- Added Clone on XRecord and XRecords to meet definition of xcore.XDatasetDef and xcore.XDatasetCollectionDef
+
 v0.0.13 - 2019-06-19
 -----------------------
 - Error corrected on XTable.SelectAll. It was not working as expected

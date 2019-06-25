@@ -178,7 +178,16 @@ func (r *XRecord)Del(key string) {
   delete(*r, key)
 }
 
-
-
-
+func (r *XRecord)Clone() xcore.XDatasetDef {
+  cloned := &XRecord{}
+  for id, val := range *r {
+    clonedval := val
+    // If the object is also cloneable, we clone it
+    if cloneable, ok := val.(interface{Clone() xcore.XDatasetDef }); ok {
+      clonedval = cloneable.Clone()
+    }
+    cloned.Set(id, clonedval)
+  }
+  return cloned
+}
 
