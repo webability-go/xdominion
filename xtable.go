@@ -463,6 +463,63 @@ func (t *XTable)Update(args ...interface{}) (int, error) {
   return 1, nil
 }
 
+
+/*
+  Upsert: update or insert
+  Args are:
+  NO ARGS: error
+  1rst ARG is a simple cast (int, string, time, float) => primary key.
+  1rst ARG is a XCondition: select where XCondition and check if exists, then:
+  2nd ARG is XRecord to modify
+*/
+
+func (t *XTable)Upsert(args ...interface{}) (int, error) {
+  // 1. analyse params
+  haskey := false
+  var key interface{}
+  hasconditions := false
+  var conditions XConditions
+  hasrecord := false
+  var record XRecord
+
+  for _, p := range args {
+    switch p.(type) {
+      case int, float64, string, time.Time: // position 0 only
+          haskey = true
+          key = p
+      case XCondition:
+        hasconditions = true
+        conditions = XConditions{p.(XCondition)}
+      case XConditions:
+        hasconditions = true
+        conditions = p.(XConditions)
+      case XRecord:
+        hasrecord = true
+        record = p.(XRecord)
+    }
+  }
+  if !hasrecord { return 0, errors.New("Error: there is no record data to use to insert or modify the records of the table") }
+
+  // search record
+  var rec *XRecord
+  if haskey {
+    rec, _ = t.SelectOne(key)
+  } else if hasconditions {
+    rec, _ = t.SelectOne(conditions)
+  }
+  primkey := t.GetPrimaryKey()
+  if rec != nil {
+    thekey, _ := rec.Get(primkey.GetName())
+    return t.Update(thekey, record)
+  }
+  record.Set(primkey.GetName(), 0)
+  _, e :=  t.Insert(record)
+  if e != nil {
+    return 0, e
+  }
+  return 1, nil
+}
+
 func (t *XTable)Delete(args ...interface{}) (int, error) {
   // 1. analyse params
   haskey := false

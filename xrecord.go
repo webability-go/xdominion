@@ -3,6 +3,7 @@ package xdominion
 import (
   "fmt"
   "time"
+  "strconv"
   
   "github.com/webability-go/xcore"
 )
@@ -101,6 +102,8 @@ func (r *XRecord)GetBool(key string) (bool, bool) {
 func (r *XRecord)GetFloat(key string) (float64, bool) {
   if val, ok := (*r)[key]; ok {
     switch val.(type) {
+      case string: v, err := strconv.ParseFloat(val.(string), 64); return v, err == nil
+      case float32: return float64(val.(float32)), true
       case float64: return val.(float64), true
       case int: return float64(val.(int)), true
       case int64: return float64(val.(int64)), true

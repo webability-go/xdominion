@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.0.15 - 2019-10-11
+-----------------------
+- Added record conversions for float values, from string, float32, int, etc
+- Added Upsert function in table (update or insert if not exists)
+
 v0.0.14 - 2019-06-25
 -----------------------
 - Added Clone on XRecord and XRecords to meet definition of xcore.XDatasetDef and xcore.XDatasetCollectionDef
