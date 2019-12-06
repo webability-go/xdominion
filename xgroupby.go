@@ -6,13 +6,13 @@ package xdominion
 
 type XGroup []XGroupBy
 
-func (g *XGroup)CreateGroup(table *XTable, DB string) string {
-  group := ""
+func (g *XGroup) CreateGroup(table *XTable, DB string) string {
+	group := ""
 
-  for _, xg := range *g {
-    group += xg.GetGroup(table, DB)
-  }
-  return group
+	for _, xg := range *g {
+		group += xg.GetGroup(table, DB)
+	}
+	return group
 }
 
 /*
@@ -20,10 +20,9 @@ func (g *XGroup)CreateGroup(table *XTable, DB string) string {
 */
 
 type XGroupBy struct {
-  Field string
+	Field string
 }
 
-func (g *XGroupBy)GetGroup(table *XTable, DB string) string {
-  return "Group By --"
+func (g *XGroupBy) GetGroup(table *XTable, DB string) string {
+	return "Group By --"
 }
-
