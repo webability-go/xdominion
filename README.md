@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.1.0 - 2019-12-06
+-----------------------
+- Added new XTable Language functionality to know the default language of data into a table
+- gofmt code formated before pushing a change on github
+
 v0.0.15 - 2019-10-11
 -----------------------
 - Added record conversions for float values, from string, float32, int, etc
