@@ -562,7 +562,10 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 		thekey, _ := rec.Get(primkey.GetName())
 		return t.Update(thekey, record)
 	}
-	record.Set(primkey.GetName(), 0)
+	hasprimkey, _ := record.Get(primkey.GetName())
+	if hasprimkey == nil {
+		record.Set(primkey.GetName(), 0)
+	}
 	_, e := t.Insert(record)
 	if e != nil {
 		return 0, e

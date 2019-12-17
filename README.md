@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.1.1 - 2019-12-17
+-----------------------
+- Corrected an error in Upsert func that was inserting a 0 even if the key was present into the record
+
 v0.1.0 - 2019-12-06
 -----------------------
 - Added new XTable Language functionality to know the default language of data into a table
