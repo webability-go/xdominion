@@ -92,6 +92,7 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 	hasfields := false
 	var fields XFieldSet
 	onlyone := false
+	var ok bool
 
 	for i, p := range args {
 		switch p.(type) {
@@ -99,20 +100,38 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 			if p.(bool) {
 				onlyone = true
 			}
-		case int:
+		case int, int32, int64:
 			if i == 0 {
 				haskey = true
 				key = p
 			} else {
 				if haslimit {
 					hasoffset = true
-					offset = p.(int)
+					offset, ok = p.(int)
+					if !ok {
+						offset32, ok := p.(int32)
+						if !ok {
+							offset64 := p.(int64)
+							offset = int(offset64)
+						} else {
+							offset = int(offset32)
+						}
+					}
 				} else {
 					haslimit = true
-					limit = p.(int)
+					limit, ok = p.(int)
+					if !ok {
+						limit32, ok := p.(int32)
+						if !ok {
+							limit64 := p.(int64)
+							limit = int(limit64)
+						} else {
+							limit = int(limit32)
+						}
+					}
 				}
 			}
-		case float64, string, time.Time: // position 0 only
+		case float32, float64, string, time.Time: // position 0 only
 			if i == 0 {
 				haskey = true
 				key = p
@@ -437,7 +456,7 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 
 	for _, p := range args {
 		switch p.(type) {
-		case int, float64, string, time.Time: // position 0 only
+		case int, int32, int64, float32, float64, string, time.Time: // position 0 only
 			haskey = true
 			key = p
 		case XCondition:
@@ -582,7 +601,7 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 
 	for _, p := range args {
 		switch p.(type) {
-		case int, float64, string, time.Time:
+		case int, int32, int64, float32, float64, string, time.Time:
 			haskey = true
 			key = p
 		case XCondition:
@@ -689,15 +708,161 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 }
 
 func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
-	return nil, nil
+	// 1. analyse params
+	hasconditions := false
+	var conditions XConditions
+
+	for _, p := range args {
+		switch p.(type) {
+		case XCondition:
+			hasconditions = true
+			conditions = XConditions{p.(XCondition)}
+		case XConditions:
+			hasconditions = true
+			conditions = p.(XConditions)
+		}
+	}
+
+	itemdata := 1
+	sqldata := make([]interface{}, 0)
+
+	sql := "select min("
+	sql += t.Prepend + field
+	sql += ") from " + t.Name
+
+	if hasconditions {
+		scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+		sql += " where " + scond
+		for _, v := range vars {
+			sqldata = append(sqldata, v)
+		}
+	}
+
+	if DEBUG {
+		fmt.Println(sql)
+	}
+
+	cursor, err := t.Base.Exec(sql, sqldata...)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close()
+
+	var min interface{}
+	cursor.Next()
+	err = cursor.Scan(&min)
+	if err != nil {
+		return 0, err
+	}
+	return min, nil
 }
 
 func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
-	return nil, nil
+	// 1. analyse params
+	hasconditions := false
+	var conditions XConditions
+
+	for _, p := range args {
+		switch p.(type) {
+		case XCondition:
+			hasconditions = true
+			conditions = XConditions{p.(XCondition)}
+		case XConditions:
+			hasconditions = true
+			conditions = p.(XConditions)
+		}
+	}
+
+	itemdata := 1
+	sqldata := make([]interface{}, 0)
+
+	sql := "select max("
+	sql += t.Prepend + field
+	sql += ") from " + t.Name
+
+	if hasconditions {
+		scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+		sql += " where " + scond
+		for _, v := range vars {
+			sqldata = append(sqldata, v)
+		}
+	}
+
+	if DEBUG {
+		fmt.Println(sql)
+	}
+
+	cursor, err := t.Base.Exec(sql, sqldata...)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close()
+
+	var max interface{}
+	cursor.Next()
+	err = cursor.Scan(&max)
+	if err != nil {
+		return 0, err
+	}
+	return max, nil
 }
 
 func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
-	return nil, nil
+	// 1. analyse params
+	hasconditions := false
+	var conditions XConditions
+
+	for _, p := range args {
+		switch p.(type) {
+		case XCondition:
+			hasconditions = true
+			conditions = XConditions{p.(XCondition)}
+		case XConditions:
+			hasconditions = true
+			conditions = p.(XConditions)
+		}
+	}
+
+	itemdata := 1
+	sqldata := make([]interface{}, 0)
+
+	sql := "select avg("
+	sql += t.Prepend + field
+	sql += ") from " + t.Name
+
+	if hasconditions {
+		scond, vars := conditions.CreateConditions(t, t.Base.DBType, itemdata)
+		sql += " where " + scond
+		for _, v := range vars {
+			sqldata = append(sqldata, v)
+		}
+	}
+
+	if DEBUG {
+		fmt.Println(sql)
+	}
+
+	cursor, err := t.Base.Exec(sql, sqldata...)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close()
+
+	var avg interface{}
+	cursor.Next()
+	err = cursor.Scan(&avg)
+	if err != nil {
+		return 0, err
+	}
+	switch avg.(type) {
+	case []byte:
+		v, err := strconv.ParseFloat(string(avg.([]byte)), 64)
+		return v, err
+	case string:
+		v, err := strconv.ParseFloat(avg.(string), 64)
+		return v, err
+	}
+	return avg, nil
 }
 
 func (t *XTable) GetPrimaryKey() XFieldDef {
