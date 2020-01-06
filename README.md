@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.1.2 - 2020-01-06
+-----------------------
+- Corrected an error in Select, Update, Delete to use int32, int64, float32 as values
+- Added functions Min, Max, Avg
+
 v0.1.1 - 2019-12-17
 -----------------------
 - Corrected an error in Upsert func that was inserting a 0 even if the key was present into the record
