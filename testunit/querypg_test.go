@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/webability-go/xdominion"
 	"testing"
+
+	"github.com/webability-go/xdominion"
 )
 
 func TestQueryPG(t *testing.T) {

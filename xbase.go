@@ -3,10 +3,11 @@ package xdominion
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 /* IMPORTANT NOTE:
@@ -16,7 +17,7 @@ As of 2018/12/01, only postgres and mysql are supported for now
 
 const (
 	// Version of XDominion
-	VERSION = "0.1.2"
+	VERSION = "0.1.3"
 
 	// The distinct supported databases
 	DB_Postgres  = "postgres"

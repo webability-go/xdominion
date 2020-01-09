@@ -114,7 +114,7 @@ func TestBase(t *testing.T) {
 	fmt.Println(res9)
 
 	i, err := tb.Update(xdominion.XRecord{"f6": 3.1415927})
-	fmt.Println("Updated: ", i)
+	fmt.Println("Updated: ", i, err)
 
 	num, err := tb.Count()
 	fmt.Println("Count: ", num)
