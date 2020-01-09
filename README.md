@@ -3,10 +3,10 @@
 XDominion for GO v0
 =============================
 
-The XDominion library is used to build object instead of queries to access any database. Queries are build on demand based on the type of database. 
+The XDominion library is used to build object instead of queries to access any database. Queries are build on demand based on the type of database.
 Do not write queries anymore, but use objects.
 
-Because you need to compile, add the database drivers directly into the code, 
+Because you need to compile, add the database drivers directly into the code,
 XDominion support only posgresql in this version. More databases will be supported later.
 
 XDominion is the Go adaptation of PHP7-Dominion libraries: a full database abstraction layer
@@ -23,6 +23,11 @@ TO DO:
 
 Version Changes Control
 =======================
+
+v0.1.3 - 2020-01-08
+-----------------------
+- Corrected an error in Insert, Update to use XRecordDef and XRecordsDef instead of XRecord and XRecords to be widely compatible with any entry parameter
+- All functions will auto-identify if parameters are XRecord, *XRecord, XRecords or *XRecords
 
 v0.1.2 - 2020-01-06
 -----------------------
@@ -133,7 +138,7 @@ Manual:
 1. Overview
 ------------------------
 
-XDominion is a dataase abstraction layer, to build and use objects of data instead of building SQL queries. 
+XDominion is a database abstraction layer, to build and use objects of data instead of building SQL queries.
 The code is portable between databases with changing the implementation, since you don't use direct incompatible SQL sentences.
 
 The library is build over 3 main objects:
@@ -249,9 +254,9 @@ Query by Key:
     }
   }
 ```
-  
+
 Query by Where:
-  
+
 ```
   res5, err := tb.Select(xdominion.XConditions{xdominion.NewXCondition("f1", "=", 1), xdominion.NewXCondition("f2", "like", "lin", "and")})
   if err != nil {

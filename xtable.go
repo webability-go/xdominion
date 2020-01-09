@@ -335,11 +335,15 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 	t.InsertedKey = nil
 	switch data.(type) {
 	case XRecords:
-		rc := data.(XRecords)
-		nrc := len(rc)
+		xdata := data.(XRecords)
+		return t.Insert(&xdata)
+	case *XRecords, XRecordsDef:
+		rc := data.(XRecordsDef)
+		nrc := rc.Count()
 		keys := make([]interface{}, nrc)
-		for _, record := range rc {
-			k, err := t.Insert(record)
+		for i := 0; i < nrc; i++ {
+			xt, _ := rc.Get(i)
+			k, err := t.Insert(xt)
 			if err != nil {
 				return nil, err
 			}
@@ -348,6 +352,9 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		t.InsertedKey = keys
 		return keys, nil
 	case XRecord:
+		xdata := data.(XRecord)
+		return t.Insert(&xdata)
+	case *XRecord, XRecordDef:
 	default:
 
 		// SUB QUERY:
@@ -356,7 +363,7 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		return nil, errors.New("Type of Data no known. Must be one of XRecord, XRecords, SubQuery")
 	}
 
-	rc := data.(XRecord)
+	rc := data.(XRecordDef)
 	sqlf := ""
 	sqlv := ""
 	item := 0
@@ -452,7 +459,7 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 	hasconditions := false
 	var conditions XConditions
 	hasrecord := false
-	var record XRecord
+	var record XRecordDef
 
 	for _, p := range args {
 		switch p.(type) {
@@ -467,7 +474,12 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 			conditions = p.(XConditions)
 		case XRecord:
 			hasrecord = true
-			record = p.(XRecord)
+			np := p.(XRecord)
+			var xp interface{} = &np
+			record = xp.(XRecordDef)
+		case *XRecord, XRecordDef:
+			hasrecord = true
+			record = p.(XRecordDef)
 		}
 	}
 	if !hasrecord {
@@ -547,7 +559,7 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 	hasconditions := false
 	var conditions XConditions
 	hasrecord := false
-	var record XRecord
+	var record XRecordDef
 
 	for _, p := range args {
 		switch p.(type) {
@@ -562,7 +574,12 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 			conditions = p.(XConditions)
 		case XRecord:
 			hasrecord = true
-			record = p.(XRecord)
+			np := p.(XRecord)
+			var xp interface{} = &np
+			record = xp.(XRecordDef)
+		case *XRecord, XRecordDef:
+			hasrecord = true
+			record = p.(XRecordDef)
 		}
 	}
 	if !hasrecord {
