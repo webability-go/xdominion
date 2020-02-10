@@ -28,11 +28,16 @@ func NewXRecord() *XRecord {
 
 // makes an interface of XDataset to reuse for other libraries and be sure we can call the functions
 func (r *XRecord) String() string {
-	return r.GoString()
+	str := "XRecord[\n"
+	for key, val := range *r {
+		str += "  " + key + ": " + fmt.Sprint(val) + "\n"
+	}
+	str += "]\n"
+	return str
 }
 
 func (r *XRecord) GoString() string {
-	return fmt.Sprint(*r)
+	return r.String()
 }
 
 func (r *XRecord) Set(key string, data interface{}) {
