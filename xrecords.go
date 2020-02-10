@@ -21,7 +21,11 @@ type XRecords []XRecordDef
 // XRecords
 // =====================
 
-func (r *XRecords) Stringify() string {
+func (r *XRecords) String() string {
+	return r.GoString()
+}
+
+func (r *XRecords) GoString() string {
 	return fmt.Sprint(r)
 }
 
