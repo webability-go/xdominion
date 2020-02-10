@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.2.0 - 2020-02-10
+-----------------------
+- Modification to XRecord and XRecords to meet xcore v1.0.0 (.String and .GoString functions added, .Stringify function removed)
+
 v0.1.3 - 2020-01-08
 -----------------------
 - Corrected an error in Insert, Update to use XRecordDef and XRecordsDef instead of XRecord and XRecords to be widely compatible with any entry parameter

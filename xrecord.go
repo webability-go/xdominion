@@ -27,7 +27,11 @@ func NewXRecord() *XRecord {
 // =====================
 
 // makes an interface of XDataset to reuse for other libraries and be sure we can call the functions
-func (r *XRecord) Stringify() string {
+func (r *XRecord) String() string {
+	return r.GoString()
+}
+
+func (r *XRecord) GoString() string {
 	return fmt.Sprint(*r)
 }
 
