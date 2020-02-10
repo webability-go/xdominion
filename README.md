@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.2.1 - 2020-02-11
+-----------------------
+- Bug Corrected on String and GoString of XRecord and XRecords
+
 v0.2.0 - 2020-02-10
 -----------------------
 - Modification to XRecord and XRecords to meet xcore v1.0.0 (.String and .GoString functions added, .Stringify function removed)

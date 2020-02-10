@@ -2,6 +2,7 @@ package xdominion
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/webability-go/xcore"
@@ -22,11 +23,16 @@ type XRecords []XRecordDef
 // =====================
 
 func (r *XRecords) String() string {
-	return r.GoString()
+	str := "XRecords[\n"
+	for key, val := range *r {
+		str += "  " + strconv.Itoa(key) + ": " + fmt.Sprint(val) + "\n"
+	}
+	str += "]\n"
+	return str
 }
 
 func (r *XRecords) GoString() string {
-	return fmt.Sprint(r)
+	return r.String()
 }
 
 func (d *XRecords) Unshift(data xcore.XDatasetDef) {
