@@ -122,13 +122,20 @@ func TestBase(t *testing.T) {
 	res10, err := tb.SelectAll(xdominion.XFieldSet{"f1", "f6"})
 	for _, r := range *res10 {
 		for _, f := range *(r.(*xdominion.XRecord)) {
-			fmt.Printf("%T %v: ", f, f)
+			fmt.Printf("%T %v: \n", f, f)
 		}
 	}
 
+	res6.Set("records", res10)
 	res11 := res6.Clone()
 
-	fmt.Println(res11)
+	//	fmt.Println(res6, res11)
+	res10cloned, _ := res11.Get("records")
+
+	fmt.Printf("%p %p \n", res10, res10cloned.(*xdominion.XRecords))
+
+	//	res10.Set("testvariable", "testvalue")
+	//	fmt.Println(res10, res10cloned.(*xdominion.XRecords))
 
 }
 

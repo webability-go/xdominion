@@ -24,6 +24,10 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.2.2 - 2020-06-03
+-----------------------
+- Bug Corrected on Clonation of XRecord, it now consider XRecords (via interface Clone() XDatasetCollectionDef) as possible subset to clone too.
+
 v0.2.1 - 2020-02-11
 -----------------------
 - Bug Corrected on String and GoString of XRecord and XRecords
