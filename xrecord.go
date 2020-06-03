@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/webability-go/xcore"
+	"github.com/webability-go/xcore/v2"
 )
 
 /*
@@ -227,6 +227,11 @@ func (r *XRecord) Clone() xcore.XDatasetDef {
 		clonedval := val
 		// If the object is also cloneable, we clone it
 		if cloneable, ok := val.(interface{ Clone() xcore.XDatasetDef }); ok {
+			clonedval = cloneable.Clone()
+		}
+		if cloneable, ok := val.(interface {
+			Clone() xcore.XDatasetCollectionDef
+		}); ok {
 			clonedval = cloneable.Clone()
 		}
 		cloned.Set(id, clonedval)
