@@ -24,6 +24,11 @@ TO DO:
 Version Changes Control
 =======================
 
+v0.2.3 - 2020-06-03
+-----------------------
+- Upgrade to xcore/v2
+- Modularization with go.mod
+
 v0.2.2 - 2020-06-03
 -----------------------
 - Bug Corrected on Clonation of XRecord, it now consider XRecords (via interface Clone() XDatasetCollectionDef) as possible subset to clone too.

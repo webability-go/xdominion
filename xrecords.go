@@ -136,7 +136,6 @@ func (r *XRecords) GetCollection(key string) (xcore.XDatasetCollectionDef, bool)
 
 func (r *XRecords) Clone() xcore.XDatasetCollectionDef {
 	cloned := &XRecords{}
-	fmt.Println("cloning XRecords")
 	for _, val := range *r {
 		*cloned = append(*cloned, val.Clone())
 	}

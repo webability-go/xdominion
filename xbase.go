@@ -17,7 +17,7 @@ As of 2018/12/01, only postgres and mysql are supported for now
 
 const (
 	// Version of XDominion
-	VERSION = "0.2.2"
+	VERSION = "0.2.3"
 
 	// The distinct supported databases
 	DB_Postgres  = "postgres"
