@@ -1,6 +1,7 @@
 package xdominion
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -17,7 +18,7 @@ As of 2018/12/01, only postgres and mysql are supported for now
 
 const (
 	// Version of XDominion
-	VERSION = "0.2.3"
+	VERSION = "0.3.0"
 
 	// The distinct supported databases
 	DB_Postgres  = "postgres"
@@ -90,25 +91,35 @@ func (b *XBase) Exec(query string, args ...interface{}) (*sql.Rows, error) {
 }
 
 func (b *XBase) Cursor() *Cursor {
-	return &Cursor{Base: b, Transactional: false}
+	return &Cursor{Base: b}
 }
 
-func (b *XBase) CursorTransactional() *Cursor {
-	c := b.Cursor()
-	c.BeginTransaction()
-	return c
+type XTransaction struct {
+	DB *XBase
+	TX *sql.Tx
 }
 
-/*
-func (b *XBase)BeginTransaction() {
-  b.DB.Begin()
+func (b *XBase) BeginTransaction() (*XTransaction, error) {
+	ctx := context.Background()
+	tx, err := b.DB.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return nil, err
+	}
+	return &XTransaction{
+		DB: b,
+		TX: tx,
+	}, nil
 }
 
-func (b *XBase)Commit() {
-  b.DB.Commit()
+func (t *XTransaction) Exec(query string, args ...interface{}) (*sql.Rows, error) {
+	cursor, err := t.TX.Query(query, args...)
+	return cursor, err
 }
 
-func (b *XBase)Rollback() {
-  b.DB.Rollback()
+func (t *XTransaction) Commit() error {
+	return t.TX.Commit()
 }
-*/
+
+func (t *XTransaction) Rollback() error {
+	return t.TX.Rollback()
+}

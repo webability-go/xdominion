@@ -1,6 +1,7 @@
 package xdominion
 
 import (
+	libsql "database/sql"
 	"errors"
 	"fmt"
 	"strconv"
@@ -330,20 +331,23 @@ func (t *XTable) SelectAll(args ...interface{}) (*XRecords, error) {
 // If data is XRecord, insert the record. Returns the key (same type as field type) interface{}
 // If data is XRecords, insert the collection of XRecord. Returns an array of keys (same type as field type) []interface{}
 // If data is SubQuery, intert the result of the sub query, return ?
-func (t *XTable) Insert(data interface{}) (interface{}, error) {
+func (t *XTable) Insert(data interface{}, args ...interface{}) (interface{}, error) {
+
+	hastrx := false
+	var trx *XTransaction
 
 	t.InsertedKey = nil
 	switch data.(type) {
 	case XRecords:
 		xdata := data.(XRecords)
-		return t.Insert(&xdata)
+		return t.Insert(&xdata, args...)
 	case *XRecords, XRecordsDef:
 		rc := data.(XRecordsDef)
 		nrc := rc.Count()
 		keys := make([]interface{}, nrc)
 		for i := 0; i < nrc; i++ {
 			xt, _ := rc.Get(i)
-			k, err := t.Insert(xt)
+			k, err := t.Insert(xt, args...)
 			if err != nil {
 				return nil, err
 			}
@@ -353,7 +357,7 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		return keys, nil
 	case XRecord:
 		xdata := data.(XRecord)
-		return t.Insert(&xdata)
+		return t.Insert(&xdata, args...)
 	case *XRecord, XRecordDef:
 	default:
 
@@ -361,6 +365,10 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		//      $sql = "insert into ".$this->name." ".$record->getSubQuery();
 
 		return nil, errors.New("Type of Data no known. Must be one of XRecord, XRecords, SubQuery")
+	}
+
+	if len(args) > 0 {
+		trx, hastrx = args[0].(*XTransaction)
 	}
 
 	rc := data.(XRecordDef)
@@ -399,6 +407,9 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 	}
 	sql := "insert into " + t.Name + " (" + sqlf + ") values (" + sqlv + ")"
 
+	var cursor *libsql.Rows
+	var err error
+
 	if primkey != "" {
 		if t.Base.DBType == DB_Postgres {
 			sql += " returning " + primkey
@@ -410,7 +421,11 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		}
 
 		var key interface{}
-		cursor, err := t.Base.Exec(sql, sqldata...)
+		if hastrx {
+			cursor, err = trx.Exec(sql, sqldata...)
+		} else {
+			cursor, err = t.Base.Exec(sql, sqldata...)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -432,7 +447,11 @@ func (t *XTable) Insert(data interface{}) (interface{}, error) {
 		fmt.Println(sqldata)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -460,12 +479,16 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 	var conditions XConditions
 	hasrecord := false
 	var record XRecordDef
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
 		case int, int32, int64, float32, float64, string, time.Time: // position 0 only
 			haskey = true
 			key = p
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -534,7 +557,13 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -560,12 +589,16 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 	var conditions XConditions
 	hasrecord := false
 	var record XRecordDef
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
 		case int, float64, string, time.Time: // position 0 only
 			haskey = true
 			key = p
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -596,13 +629,22 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 	primkey := t.GetPrimaryKey()
 	if rec != nil {
 		thekey, _ := rec.Get(primkey.GetName())
-		return t.Update(thekey, record)
+		if hastrx {
+			return t.Update(thekey, record, trx)
+		} else {
+			return t.Update(thekey, record)
+		}
 	}
 	hasprimkey, _ := record.Get(primkey.GetName())
 	if hasprimkey == nil {
 		record.Set(primkey.GetName(), 0)
 	}
-	_, e := t.Insert(record)
+	var e error
+	if hastrx {
+		_, e = t.Insert(record, trx)
+	} else {
+		_, e = t.Insert(record)
+	}
 	if e != nil {
 		return 0, e
 	}
@@ -615,12 +657,16 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 	var key interface{}
 	hasconditions := false
 	var conditions XConditions
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
 		case int, int32, int64, float32, float64, string, time.Time:
 			haskey = true
 			key = p
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -656,7 +702,13 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
