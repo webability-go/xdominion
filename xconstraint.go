@@ -24,6 +24,7 @@ type XConstraints []XConstraint
 // =====================
 
 func (c *XConstraints) Get(ctype string) *XConstraint {
+	// TODO(phil) And what if there are more than one contraint of this type ? for instance MI and MU may be more than one
 	for _, ct := range *c {
 		if ct.Type == ctype {
 			return &ct
@@ -54,6 +55,41 @@ func (c *XConstraints) CreateConstraints(prepend string, name string, DB string)
 		cnt += " references " + fk.Data[0] + "(" + fk.Data[1] + ")"
 	}
 	return cnt
+}
+
+func (c *XConstraints) CreateIndex(table string, prepend string, field string, DB string) []string {
+
+	// TODO(phil) simplify the code, it's virtually the same code for 4 types of indexes
+	indexes := []string{}
+	in := c.Get(IN)
+	if in != nil {
+		i := "create index i" + prepend + field + " on " + table + "(" + prepend + field + ")"
+		indexes = append(indexes, i)
+	}
+	ui := c.Get(UI)
+	if ui != nil {
+		i := "create unique index i" + prepend + field + " on " + table + "(" + prepend + field + ")"
+		indexes = append(indexes, i)
+	}
+	mi := c.Get(MI)
+	if mi != nil {
+		flds := prepend + field
+		for _, f := range mi.Data {
+			flds += "," + prepend + f
+		}
+		i := "create index i" + prepend + field + " on " + table + "(" + flds + ")"
+		indexes = append(indexes, i)
+	}
+	mu := c.Get(MU)
+	if mu != nil {
+		flds := prepend + field
+		for _, f := range mu.Data {
+			flds += "," + prepend + f
+		}
+		i := "create unique index i" + prepend + field + " on " + table + "(" + flds + ")"
+		indexes = append(indexes, i)
+	}
+	return indexes
 }
 
 /*

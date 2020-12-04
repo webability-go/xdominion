@@ -42,11 +42,13 @@ func (t *XTable) Synchronize() error {
 
 	// creates the "create table" query
 	query := "Create table " + t.Name + " ("
+	indexes := []string{}
 	for i, f := range t.Fields {
 		if i > 0 {
 			query += ","
 		}
 		query += f.CreateField(t.Prepend, t.Base.DBType, &ifText)
+		indexes = append(indexes, f.CreateIndex(t.Name, t.Prepend, t.Base.DBType)...)
 	}
 	query += ")"
 
@@ -58,7 +60,17 @@ func (t *XTable) Synchronize() error {
 	if err != nil {
 		return err
 	}
-	defer cursor.Close()
+	cursor.Close()
+
+	if len(indexes) > 0 {
+		for _, i := range indexes {
+			cursor, err = t.Base.Exec(i)
+			if err != nil {
+				return err
+			}
+			cursor.Close()
+		}
+	}
 	return nil
 }
 

@@ -198,6 +198,11 @@ XRecord
 Version Changes Control
 =======================
 
+v0.3.1 - 2020-12-04
+-----------------------
+- Implementation of indexes creation during the table synchronization. Supports now index, unique index, multiple index and multiple unique index.
+
+
 v0.3.0 - 2020-11-10
 -----------------------
 - Implementation of transactions, new XTransaction object and functions to create a transaction, commit or rollback it.
