@@ -21,7 +21,7 @@ type XFieldDef interface {
 	// creates the sequence used by the field (only autoincrement fields)
 	CreateSequence(table string) string
 	// creates the index used by the field (normal, unique, multi, multi unique)
-	CreateIndex(table string, id string, DB XBase) string
+	CreateIndex(table string, id string, DB string) []string
 	// gets the name of the field
 	GetName() string
 	// gets the type of the field

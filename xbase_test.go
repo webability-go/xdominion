@@ -32,6 +32,8 @@ func TestXCore_commit(t *testing.T) {
 
 	tb := getTableDef(base)
 
+	fmt.Println(tb.Synchronize())
+
 	// insert
 	res1, err := tb.Insert(XRecord{"f1": 3, "f2": "Data line 1"})
 	if err != nil {
@@ -96,9 +98,9 @@ func getTableDef(base *XBase) *XTable {
 		XConstraint{Type: NN},
 	}})
 	t.AddField(XFieldText{Name: "f3"})
-	t.AddField(XFieldDate{Name: "f4"})
-	t.AddField(XFieldDateTime{Name: "f5"})
-	t.AddField(XFieldFloat{Name: "f6"})
+	t.AddField(XFieldDate{Name: "f4", Constraints: XConstraints{XConstraint{Type: IN}}})
+	t.AddField(XFieldDateTime{Name: "f5", Constraints: XConstraints{XConstraint{Type: UI}}})
+	t.AddField(XFieldFloat{Name: "f6", Constraints: XConstraints{XConstraint{Type: MU, Data: []string{"f4", "f5"}}}})
 	t.SetBase(base)
 	return t
 }

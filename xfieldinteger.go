@@ -61,8 +61,11 @@ func (f XFieldInteger) CreateSequence(table string) string {
 }
 
 // creates the index used by the field (normal, unique, multi, multi unique)
-func (f XFieldInteger) CreateIndex(table string, id string, DB XBase) string {
-	return ""
+func (f XFieldInteger) CreateIndex(table string, id string, DB string) []string {
+	if f.Constraints != nil {
+		return f.Constraints.CreateIndex(table, id, f.Name, DB)
+	}
+	return []string{}
 }
 
 // gets the name of the field
