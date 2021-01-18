@@ -198,10 +198,13 @@ XRecord
 Version Changes Control
 =======================
 
+v0.3.2 - 2021-01-17
+-----------------------
+- Implementation of transactions into select type queries (select, min, max, avg, count, ...)
+
 v0.3.1 - 2020-12-04
 -----------------------
 - Implementation of indexes creation during the table synchronization. Supports now index, unique index, multiple index and multiple unique index.
-
 
 v0.3.0 - 2020-11-10
 -----------------------
