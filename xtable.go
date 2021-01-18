@@ -36,35 +36,51 @@ func (t *XTable) SetLanguage(lang language.Tag) {
 	t.Language = lang
 }
 
-func (t *XTable) Synchronize() error {
+func (t *XTable) Synchronize(args ...interface{}) error {
 	// This funcion is supposed to check structure vs def and insert/modifie table fiels and constraints
 	var ifText bool = false
+	hastrx := false
+	var trx *XTransaction
+
+	if len(args) > 0 {
+		trx, hastrx = args[0].(*XTransaction)
+	}
 
 	// creates the "create table" query
-	query := "Create table " + t.Name + " ("
+	sql := "Create table " + t.Name + " ("
 	indexes := []string{}
 	for i, f := range t.Fields {
 		if i > 0 {
-			query += ","
+			sql += ","
 		}
-		query += f.CreateField(t.Prepend, t.Base.DBType, &ifText)
+		sql += f.CreateField(t.Prepend, t.Base.DBType, &ifText)
 		indexes = append(indexes, f.CreateIndex(t.Name, t.Prepend, t.Base.DBType)...)
 	}
-	query += ")"
+	sql += ")"
 
 	if DEBUG {
-		fmt.Println(query)
+		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(query)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql)
+	} else {
+		cursor, err = t.Base.Exec(sql)
+	}
 	if err != nil {
 		return err
 	}
 	cursor.Close()
 
 	if len(indexes) > 0 {
-		for _, i := range indexes {
-			cursor, err = t.Base.Exec(i)
+		for _, sqli := range indexes {
+			if hastrx {
+				cursor, err = trx.Exec(sqli)
+			} else {
+				cursor, err = t.Base.Exec(sqli)
+			}
 			if err != nil {
 				return err
 			}
@@ -106,6 +122,8 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 	var fields XFieldSet
 	onlyone := false
 	var ok bool
+	hastrx := false
+	var trx *XTransaction
 
 	for i, p := range args {
 		switch p.(type) {
@@ -172,6 +190,8 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 		case XFieldSet:
 			hasfields = true
 			fields = p.(XFieldSet)
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		}
 	}
 	if onlyone {
@@ -258,7 +278,13 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 	}
 
 	// 6. exec and dump result
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -735,6 +761,8 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 	var field string
 	hasconditions := false
 	var conditions XConditions
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
@@ -747,6 +775,8 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		}
 	}
 
@@ -773,7 +803,13 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -792,6 +828,8 @@ func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
 	// 1. analyse params
 	hasconditions := false
 	var conditions XConditions
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
@@ -801,6 +839,8 @@ func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		}
 	}
 
@@ -823,7 +863,13 @@ func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -842,6 +888,8 @@ func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
 	// 1. analyse params
 	hasconditions := false
 	var conditions XConditions
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
@@ -851,6 +899,8 @@ func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		}
 	}
 
@@ -873,7 +923,13 @@ func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -892,6 +948,8 @@ func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
 	// 1. analyse params
 	hasconditions := false
 	var conditions XConditions
+	hastrx := false
+	var trx *XTransaction
 
 	for _, p := range args {
 		switch p.(type) {
@@ -901,6 +959,8 @@ func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XTransaction:
+			trx, hastrx = p.(*XTransaction)
 		}
 	}
 
@@ -923,7 +983,13 @@ func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
 		fmt.Println(sql)
 	}
 
-	cursor, err := t.Base.Exec(sql, sqldata...)
+	var cursor *libsql.Rows
+	var err error
+	if hastrx {
+		cursor, err = trx.Exec(sql, sqldata...)
+	} else {
+		cursor, err = t.Base.Exec(sql, sqldata...)
+	}
 	if err != nil {
 		return 0, err
 	}
