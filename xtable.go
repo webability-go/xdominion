@@ -44,6 +44,9 @@ func (t *XTable) Synchronize(args ...interface{}) error {
 
 	if len(args) > 0 {
 		trx, hastrx = args[0].(*XTransaction)
+		if trx == nil {
+			hastrx = false
+		}
 	}
 
 	// creates the "create table" query
@@ -192,6 +195,9 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 			fields = p.(XFieldSet)
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		}
 	}
 	if onlyone {
@@ -407,6 +413,9 @@ func (t *XTable) Insert(data interface{}, args ...interface{}) (interface{}, err
 
 	if len(args) > 0 {
 		trx, hastrx = args[0].(*XTransaction)
+		if trx == nil {
+			hastrx = false
+		}
 	}
 
 	rc := data.(XRecordDef)
@@ -527,6 +536,9 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 			key = p
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -637,6 +649,9 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 			key = p
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -705,6 +720,9 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 			key = p
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
@@ -777,6 +795,9 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 			conditions = p.(XConditions)
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		}
 	}
 
@@ -841,6 +862,9 @@ func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
 			conditions = p.(XConditions)
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		}
 	}
 
@@ -901,6 +925,9 @@ func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
 			conditions = p.(XConditions)
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		}
 	}
 
@@ -961,6 +988,9 @@ func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
 			conditions = p.(XConditions)
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
+			if trx == nil {
+				hastrx = false
+			}
 		}
 	}
 
