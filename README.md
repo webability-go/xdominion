@@ -198,6 +198,10 @@ XRecord
 Version Changes Control
 =======================
 
+v0.3.3 - 2021-01-20
+-----------------------
+- Correction to support nil transactions (no transaction even if the parameter is passed with a nil value) into select type queries (select, min, max, avg, count, ...)
+
 v0.3.2 - 2021-01-17
 -----------------------
 - Implementation of transactions into select type queries (select, min, max, avg, count, ...)
