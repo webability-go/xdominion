@@ -198,6 +198,10 @@ XRecord
 Version Changes Control
 =======================
 
+v0.4.0 - 2021-12-10
+-----------------------
+- Now all the xtable functions (Select, Update, Delete, Count, etc) can accept pointers parameters and nil casted parameters (for instance *XCondition or *XOrderBy than can be nil too).
+
 v0.3.3 - 2021-01-20
 -----------------------
 - Correction to support nil transactions (no transaction even if the parameter is passed with a nil value) into select type queries (select, min, max, avg, count, ...)

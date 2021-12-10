@@ -175,24 +175,61 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				fmt.Printf("DENTRO DEL TEST: %v, %p\n", p, p)
+
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case XOrderBy:
 			hasorder = true
 			order = XOrder{p.(XOrderBy)}
+		case *XOrderBy:
+			if p != nil && p.(*XOrderBy) != nil {
+				hasorder = true
+				order = XOrder{*p.(*XOrderBy)}
+			}
 		case XOrder:
 			hasorder = true
 			order = p.(XOrder)
+		case *XOrder:
+			if p != nil && p.(*XOrder) != nil {
+				hasorder = true
+				order = *p.(*XOrder)
+			}
 		case XGroupBy:
 			hasgroup = true
 			group = XGroup{p.(XGroupBy)}
+		case *XGroupBy:
+			if p != nil && p.(*XGroupBy) != nil {
+				hasgroup = true
+				group = XGroup{*p.(*XGroupBy)}
+			}
 		case XGroup:
 			hasgroup = true
 			group = p.(XGroup)
+		case *XGroup:
+			if p != nil && p.(*XGroup) != nil {
+				hasgroup = true
+				group = *p.(*XGroup)
+			}
 		case XFieldSet:
 			hasfields = true
 			fields = p.(XFieldSet)
+		case *XFieldSet:
+			if p != nil && p.(*XFieldSet) != nil {
+				hasfields = true
+				fields = *p.(*XFieldSet)
+			}
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
 			if trx == nil {
@@ -542,9 +579,19 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case XRecord:
 			hasrecord = true
 			np := p.(XRecord)
@@ -655,9 +702,19 @@ func (t *XTable) Upsert(args ...interface{}) (int, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case XRecord:
 			hasrecord = true
 			np := p.(XRecord)
@@ -726,9 +783,19 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		}
 	}
 
@@ -790,9 +857,19 @@ func (t *XTable) Count(args ...interface{}) (int, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
 			if trx == nil {
@@ -857,9 +934,19 @@ func (t *XTable) Min(field string, args ...interface{}) (interface{}, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
 			if trx == nil {
@@ -920,9 +1007,19 @@ func (t *XTable) Max(field string, args ...interface{}) (interface{}, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
 			if trx == nil {
@@ -983,9 +1080,19 @@ func (t *XTable) Avg(field string, args ...interface{}) (interface{}, error) {
 		case XCondition:
 			hasconditions = true
 			conditions = XConditions{p.(XCondition)}
+		case *XCondition:
+			if p != nil && p.(*XCondition) != nil {
+				hasconditions = true
+				conditions = XConditions{*p.(*XCondition)}
+			}
 		case XConditions:
 			hasconditions = true
 			conditions = p.(XConditions)
+		case *XConditions:
+			if p != nil && p.(*XConditions) != nil {
+				hasconditions = true
+				conditions = *p.(*XConditions)
+			}
 		case *XTransaction:
 			trx, hastrx = p.(*XTransaction)
 			if trx == nil {
