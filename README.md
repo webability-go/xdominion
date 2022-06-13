@@ -198,6 +198,14 @@ XRecord
 Version Changes Control
 =======================
 
+v0.4.2 - 2022-06-13
+-----------------------
+- Correction of a bug on DoSelect with limits, a 0 limit is not a limit
+
+v0.4.1 - 2022-01-19
+-----------------------
+- XConditions, XCondition, XOrder, XOrderBy, XFieldSet can now be cloned with <object>.Clone()
+
 v0.4.0 - 2021-12-10
 -----------------------
 - Now all the xtable functions (Select, Update, Delete, Count, etc) can accept pointers parameters and nil casted parameters (for instance *XCondition or *XOrderBy than can be nil too).

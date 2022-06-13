@@ -46,6 +46,15 @@ func (c *XConditions) CreateConditions(table *XTable, DB string, baseindex int) 
 	return cond, data
 }
 
+func (c *XConditions) Clone() XConditions {
+	nc := XConditions{}
+	for _, xc := range *c {
+		nxc := xc.Clone()
+		nc = append(nc, nxc)
+	}
+	return nc
+}
+
 /*
   The XCondition structure
 */
@@ -155,4 +164,17 @@ func (c *XCondition) GetCondition(table *XTable, DB string, baseindex int) (stri
 	}
 
 	return cond, value, indexused
+}
+
+func (c *XCondition) Clone() XCondition {
+	nc := XCondition{
+		Field:          c.Field,
+		Operator:       c.Operator,
+		Limit:          c.Limit,
+		LimitExtra:     c.LimitExtra,
+		OperatorGlobal: c.OperatorGlobal,
+		AtomOpen:       c.AtomOpen,
+		AtomClose:      c.AtomClose,
+	}
+	return nc
 }
