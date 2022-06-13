@@ -309,7 +309,7 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 	// having, needs a group by, set of conditions
 
 	// 5. Limits
-	if haslimit {
+	if haslimit && limit > 0 {
 		sql += " limit " + strconv.Itoa(limit)
 	}
 	if hasoffset {

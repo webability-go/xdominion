@@ -26,6 +26,15 @@ func (o *XOrder) CreateOrder(table *XTable, DB string) string {
 	return order
 }
 
+func (o *XOrder) Clone() XOrder {
+	no := XOrder{}
+	for _, xo := range *o {
+		nxo := xo.Clone()
+		no = append(no, nxo)
+	}
+	return no
+}
+
 /*
   The XOrderBy structure
 */
@@ -54,4 +63,12 @@ func (c *XOrderBy) GetOrder(table *XTable, DB string) string {
 		order += " " + c.Operator
 	}
 	return order
+}
+
+func (o *XOrderBy) Clone() XOrderBy {
+	no := XOrderBy{
+		Field:    o.Field,
+		Operator: o.Operator,
+	}
+	return no
 }
