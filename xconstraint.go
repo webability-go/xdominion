@@ -1,28 +1,26 @@
 package xdominion
 
 const (
-	PK = "pk"
-	NN = "nn"
-	AI = "ai"
-	FK = "fk"
-	IN = "in"
-	UI = "ui"
-	MI = "mi"
-	MU = "mu"
-	DC = "dc"
-	TR = "tr"
+	PK = "pk" // Primary Key Constraint type
+	NN = "nn" // Not Null Constraint type
+	AI = "ai" // Auto Increment Constraint type
+	FK = "fk" // Foreign Key Constraint type
+	IN = "in" // Index Constraint type
+	UI = "ui" // Unique Index Constraint type
+	MI = "mi" // Multiple Index Constraint type
+	MU = "mu" // Multiple Unique Index Constraint type
+	DC = "dc" // Drop cascade Constraint type
+	TR = "tr" // Transfer to another PK before deleting (is not drop cascade)
 )
 
-/*
-  The XConstraints is a colection of XConstrain
-*/
-
+// XConstraints is a collection of XConstraint structures.
 type XConstraints []XConstraint
 
 // =====================
 // XConstraints
 // =====================
 
+// Get function returns a pointer to an XConstraint structure whose type matches the ctype string.
 func (c *XConstraints) Get(ctype string) *XConstraint {
 	// TODO(phil) And what if there are more than one contraint of this type ? for instance MI and MU may be more than one
 	for _, ct := range *c {
@@ -33,6 +31,10 @@ func (c *XConstraints) Get(ctype string) *XConstraint {
 	return nil
 }
 
+// CreateConstraints function returns a string of constraints for a database field.
+// prepend: a string to be prepended before the field name.
+// name: the name of the field.
+// DB: the database type.
 func (c *XConstraints) CreateConstraints(prepend string, name string, DB string) string {
 	cnt := ""
 	pk := c.Get(PK)
@@ -57,6 +59,11 @@ func (c *XConstraints) CreateConstraints(prepend string, name string, DB string)
 	return cnt
 }
 
+// CreateIndex function returns an array of strings of SQL index creation queries.
+// table: the name of the table.
+// prepend: a string to be prepended before the field name.
+// field: the name of the field.
+// DB: the database type.
 func (c *XConstraints) CreateIndex(table string, prepend string, field string, DB string) []string {
 
 	// TODO(phil) simplify the code, it's virtually the same code for 4 types of indexes
@@ -92,15 +99,10 @@ func (c *XConstraints) CreateIndex(table string, prepend string, field string, D
 	return indexes
 }
 
-/*
-  The XConstraint structure
-*/
-
+// XConstraint is a structure representing a database constraint.
+// Type: the type of constraint, one of PK, NN, AI, FK, IN, UI, MI, MU, DC and TR.
+// Data: an array of strings containing the data related to the constraint.
 type XConstraint struct {
 	Type string
 	Data []string
 }
-
-// =====================
-// XConstraint
-// =====================
