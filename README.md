@@ -3,8 +3,7 @@ XDominion for GO v0
 =============================
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/webability-go/xdominion)](https://goreportcard.com/report/github.com/webability-go/xdominion)
-[![GoDoc](https://godoc.org/github.com/webability-go/xdominion/v2?status.png)](https://godoc.org/github.com/webability-go/xdominion/v2)
-[![GolangCI](https://golangci.com/badges/github.com/webability-go/xdominion.svg)](https://golangci.com)
+[![GoDoc](https://godoc.org/github.com/webability-go/xdominion?status.png)](https://godoc.org/github.com/webability-go/xdominion)
 
 
 The XDominion library is used to build object instead of queries to access any database. Queries are build on demand based on the type of database.
@@ -22,7 +21,7 @@ The xdominion library uses reflection to map Go structs to database tables, and 
 
 Overall, xdominion provides a simple and intuitive way to interact with databases using objects and abstracts the underlying database implementation. It is a well-designed library with a clear API and support for multiple database backends.
 
-XDominion needs go v1.17+
+XDominion needs Go v1.17+
 
 
 
@@ -30,6 +29,10 @@ XDominion needs go v1.17+
 
 Version Changes Control
 =======================
+
+v0.5.1 - 2024-04-09
+-----------------------
+- Correction of a but into manuals
 
 v0.5.0 - 2023-05-02
 -----------------------
