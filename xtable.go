@@ -500,8 +500,8 @@ func (t *XTable) Insert(data interface{}, args ...interface{}) (interface{}, err
 		}
 
 		if DEBUG {
-			fmt.Println(sql)
 			fmt.Println(sqldata)
+			fmt.Println(sql)
 		}
 
 		var key interface{}
@@ -527,8 +527,8 @@ func (t *XTable) Insert(data interface{}, args ...interface{}) (interface{}, err
 	}
 
 	if DEBUG {
-		fmt.Println(sql)
 		fmt.Println(sqldata)
+		fmt.Println(sql)
 	}
 
 	if hastrx {
@@ -651,6 +651,7 @@ func (t *XTable) Update(args ...interface{}) (int, error) {
 	}
 
 	if DEBUG {
+		fmt.Println(sqldata)
 		fmt.Println(sql)
 	}
 
@@ -822,6 +823,7 @@ func (t *XTable) Delete(args ...interface{}) (int, error) {
 	}
 
 	if DEBUG {
+		fmt.Println(sqldata)
 		fmt.Println(sql)
 	}
 

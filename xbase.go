@@ -17,16 +17,11 @@ As of 2018/12/01, only postgres and mysql are supported for now
 */
 
 const (
-	// Version of XDominion
-	VERSION = "0.4.2"
-
 	// The distinct supported databases
 	DB_Postgres  = "postgres"
 	DB_MySQL     = "mysql"
 	DB_Localhost = "localhost"
 )
-
-var DEBUG bool = false
 
 type XBase struct {
 	DB       *sql.DB
@@ -90,8 +85,9 @@ func (b *XBase) Exec(query string, args ...interface{}) (*sql.Rows, error) {
 	return cursor, err
 }
 
-func (b *XBase) Cursor() *Cursor {
-	return &Cursor{Base: b}
+func (b *XBase) NewXCursor() *XCursor {
+	c := &XCursor{Base: b}
+	return c
 }
 
 type XTransaction struct {
@@ -114,6 +110,11 @@ func (b *XBase) BeginTransaction() (*XTransaction, error) {
 func (t *XTransaction) Exec(query string, args ...interface{}) (*sql.Rows, error) {
 	cursor, err := t.TX.Query(query, args...)
 	return cursor, err
+}
+
+func (t *XTransaction) NewXCursor() *XCursor {
+	c := &XCursor{Transaction: t}
+	return c
 }
 
 func (t *XTransaction) Commit() error {

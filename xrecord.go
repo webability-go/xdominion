@@ -89,6 +89,12 @@ func (r *XRecord) GetString(key string) (string, bool) {
 func (r *XRecord) GetInt(key string) (int, bool) {
 	if val, ok := (*r)[key]; ok {
 		switch val.(type) {
+		case string:
+			i, err := strconv.Atoi(val.(string))
+			if err != nil {
+				return 0, false
+			}
+			return i, true
 		case int:
 			return val.(int), true
 		case int64:

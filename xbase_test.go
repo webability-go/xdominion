@@ -18,6 +18,10 @@ func ExampleXBase() {
 	base.Logon()
 }
 
+func TestXCore_exec(t *testing.T) {
+
+}
+
 func TestXCore_commit(t *testing.T) {
 
 	base := &XBase{
