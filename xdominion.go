@@ -445,7 +445,7 @@
 package xdominion
 
 // VERSION is the used version number of the XDominion library.
-const VERSION = "0.5.0"
+const VERSION = "0.5.1"
 
 // DEBUG is the flag to activate debugging on the library.
 // if DEBUG is set to TRUE, DEBUG indicates to the XDominion libraries to log a trace of queries and functions called, with most important parameters.
