@@ -2,6 +2,11 @@
 XDominion for GO v0
 =============================
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/webability-go/xdominion)](https://goreportcard.com/report/github.com/webability-go/xdominion)
+[![GoDoc](https://godoc.org/github.com/webability-go/xdominion/v2?status.png)](https://godoc.org/github.com/webability-go/xdominion/v2)
+[![GolangCI](https://golangci.com/badges/github.com/webability-go/xdominion.svg)](https://golangci.com)
+
+
 The XDominion library is used to build object instead of queries to access any database. Queries are build on demand based on the type of database.
 Do not write queries anymore, but use objects.
 
