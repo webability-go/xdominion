@@ -32,7 +32,7 @@ Version Changes Control
 
 v0.5.1 - 2024-04-09
 -----------------------
-- Correction of a but into manuals
+- Correction of a bug into manuals
 
 v0.5.0 - 2023-05-02
 -----------------------
