@@ -30,6 +30,11 @@ XDominion needs Go v1.17+
 Version Changes Control
 =======================
 
+v0.5.2 - 2025-02-14
+-----------------------
+- Aggregation capability added to the XTable and related objects. (GroupBy, Group, Select <functions>, count, avg, min, max, now, etc)
+- Upgraded golang.org/x/net for a security patch to v0.33.0
+ 
 v0.5.1 - 2024-04-09
 -----------------------
 - Correction of a bug into manuals

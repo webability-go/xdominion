@@ -27,6 +27,8 @@ func TestXTable_select(t *testing.T) {
 	r, err := tb.SelectAll(where, order)
 	fmt.Println(r, err)
 
+	r, err = tb.SelectAll(&XFieldSet{"f2", "count(*)"}, &XConditions{NewXCondition("f1", "!=", 1)}, &XGroupBy{"f2"}, &XOrderBy{"count(*)", DESC}, 10)
+	fmt.Println(r, err)
 }
 
 func buildData(tb *XTable) {

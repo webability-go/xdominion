@@ -10,6 +10,9 @@ func (g *XGroup) CreateGroup(table *XTable, DB string) string {
 	group := ""
 
 	for _, xg := range *g {
+		if group != "" {
+			group += ", "
+		}
 		group += xg.GetGroup(table, DB)
 	}
 	return group
@@ -24,5 +27,10 @@ type XGroupBy struct {
 }
 
 func (g *XGroupBy) GetGroup(table *XTable, DB string) string {
-	return "Group By --"
+	// If the field is part of the table, return the field with prepend, else return the field
+	f := table.GetField(g.Field)
+	if f != nil {
+		return table.Prepend + f.GetName()
+	}
+	return g.Field
 }

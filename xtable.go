@@ -246,26 +246,36 @@ func (t *XTable) Select(args ...interface{}) (interface{}, error) {
 	sqlf := ""
 	item := 0
 	fieldslist := []string{}
-	for _, f := range t.Fields {
-		fname := f.GetName()
-		if hasfields {
+	if hasfields {
+		for _, fn := range fields {
 			infield := false
-			for _, fn := range fields {
+			for _, f := range t.Fields {
+				fname := f.GetName()
 				if fn == fname {
 					infield = true
 					break
 				}
 			}
-			if !infield {
-				continue
+			if item > 0 {
+				sqlf += ", "
 			}
+			if infield {
+				sqlf += t.Prepend
+			}
+			sqlf += fn
+			fieldslist = append(fieldslist, fn)
+			item++
 		}
-		if item > 0 {
-			sqlf += ", "
+	} else {
+		for _, f := range t.Fields {
+			fname := f.GetName()
+			if item > 0 {
+				sqlf += ", "
+			}
+			sqlf += t.Prepend + fname
+			fieldslist = append(fieldslist, fname)
+			item++
 		}
-		sqlf += t.Prepend + fname
-		fieldslist = append(fieldslist, fname)
-		item++
 	}
 	if item == 0 {
 		return nil, errors.New("Error: there is no fields to search for")
