@@ -54,7 +54,7 @@ func (c *XOrderBy) GetOrder(table *XTable, DB string) string {
 	field := table.GetField(c.Field)
 
 	if field == nil {
-		return ""
+		return c.Field + " " + c.Operator
 	}
 
 	order := table.Prepend + field.GetName()
